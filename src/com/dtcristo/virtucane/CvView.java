@@ -1,4 +1,5 @@
-/* Copyright (C) 2011  David Cristofaro
+/* 
+ * Copyright (C) 2011  David Cristofaro
  * 
  * Email:      d@davidcristofaro.com
  * Homepage:   http://davidcristofaro.com
