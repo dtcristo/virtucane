@@ -24,8 +24,11 @@
 package com.dtcristo.virtucane;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -42,6 +45,8 @@ public class VirtucaneActivity extends Activity {
     private MenuItem            mMenuItemGrey;
     private MenuItem            mMenuItemCanny;
 
+    private AlertDialog.Builder mBuilder;
+
     public static int           viewMode            = VIEW_MODE_RGBA;
 
     public VirtucaneActivity() {
@@ -55,6 +60,21 @@ public class VirtucaneActivity extends Activity {
         Log.i(TAG, "onCreate()");
 
         setContentView(new VirtucaneView(this));
+
+        // Initialize AlertDialog
+        mBuilder = new AlertDialog.Builder(this);
+        mBuilder.setMessage("This text is a sample. OCR text would normally appear here.");
+        mBuilder.setPositiveButton("Speak", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // TODO: Speak the OCR'd text
+                dialog.cancel();
+            }
+        });
+        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
     }
 
     @Override
@@ -77,6 +97,19 @@ public class VirtucaneActivity extends Activity {
         else if (item == mMenuItemGrey) viewMode = VIEW_MODE_GREY;
         else if (item == mMenuItemCanny) viewMode = VIEW_MODE_CANNY;
         return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.i(TAG, "onKeyDown()");
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                AlertDialog alert = mBuilder.create();
+                alert.show();
+                return true;
+        }
+        return false;
     }
 
 }
