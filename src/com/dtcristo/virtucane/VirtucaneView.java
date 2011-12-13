@@ -32,7 +32,9 @@ import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.util.Log;
@@ -42,6 +44,7 @@ class VirtucaneView extends CvCameraView {
     private static final String TAG       = "VirtucaneView";
 
     private MediaPlayer         mMediaPlayer;
+    private AlertDialog.Builder mBuilder;
 
     private boolean             isBeeping = false;
     private boolean             beep      = false;
@@ -57,6 +60,21 @@ class VirtucaneView extends CvCameraView {
         // Initialize MediaPlayer
         mMediaPlayer = MediaPlayer.create(context, R.raw.sine);
         mMediaPlayer.setLooping(true);
+
+        // Initialize AlertDialog
+        mBuilder = new AlertDialog.Builder(context);
+        mBuilder.setMessage("This text is a sample. OCR text would normally appear here.");
+        mBuilder.setPositiveButton("Speak", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // TODO: Speak the OCR'd text
+                dialog.cancel();
+            }
+        });
+        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
     }
 
     @Override
@@ -154,6 +172,11 @@ class VirtucaneView extends CvCameraView {
             mGrey = null;
             mTemp = null;
         }
+    }
+    
+    public void ocrFrame() {
+        AlertDialog alert = mBuilder.create();
+        alert.show();
     }
 
     /** Rotates a matrix 90 degrees clockwise. */

@@ -24,8 +24,6 @@
 package com.dtcristo.virtucane;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -40,14 +38,14 @@ public class VirtucaneActivity extends Activity {
     public static final int     VIEW_MODE_GREY      = 2;
     public static final int     VIEW_MODE_CANNY     = 3;
 
+    public static int           viewMode            = VIEW_MODE_RGBA;
+
+    private VirtucaneView       mVirtucaneView;
+
     private MenuItem            mMenuItemRgba;
     private MenuItem            mMenuItemThreshold;
     private MenuItem            mMenuItemGrey;
     private MenuItem            mMenuItemCanny;
-
-    private AlertDialog.Builder mBuilder;
-
-    public static int           viewMode            = VIEW_MODE_RGBA;
 
     public VirtucaneActivity() {
         Log.i(TAG, "VirtualCaneActivity()");
@@ -59,22 +57,8 @@ public class VirtucaneActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate()");
 
-        setContentView(new VirtucaneView(this));
-
-        // Initialize AlertDialog
-        mBuilder = new AlertDialog.Builder(this);
-        mBuilder.setMessage("This text is a sample. OCR text would normally appear here.");
-        mBuilder.setPositiveButton("Speak", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // TODO: Speak the OCR'd text
-                dialog.cancel();
-            }
-        });
-        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
-            }
-        });
+        mVirtucaneView = new VirtucaneView(this);
+        setContentView(mVirtucaneView);
     }
 
     @Override
@@ -104,9 +88,17 @@ public class VirtucaneActivity extends Activity {
         Log.i(TAG, "onKeyDown()");
 
         switch (keyCode) {
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        Log.i(TAG, "onKeyUp()");
+
+        switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                AlertDialog alert = mBuilder.create();
-                alert.show();
+                mVirtucaneView.ocrFrame();
                 return true;
         }
         return false;
