@@ -30,7 +30,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class VirtucaneActivity extends Activity {
-    private static final String TAG                 = "VirtualCaneActivity";
+    private static final String TAG                 = "VirtucaneActivity";
 
     public static final int     VIEW_MODE_RGBA      = 0;
     public static final int     VIEW_MODE_THRESHOLD = 1;
@@ -54,7 +54,7 @@ public class VirtucaneActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate()");
 
-        setContentView(new CvView(this));
+        setContentView(new VirtucaneView(this));
     }
 
     @Override
@@ -78,4 +78,5 @@ public class VirtucaneActivity extends Activity {
         else if (item == mMenuItemCanny) viewMode = VIEW_MODE_CANNY;
         return true;
     }
+
 }
