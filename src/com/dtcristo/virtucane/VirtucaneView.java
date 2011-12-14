@@ -23,6 +23,8 @@
 
 package com.dtcristo.virtucane;
 
+import java.util.Locale;
+
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -37,14 +39,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-class VirtucaneView extends CvCameraView {
+class VirtucaneView extends CvCameraView implements OnInitListener {
     private static final String TAG       = "VirtucaneView";
 
     private MediaPlayer         mMediaPlayer;
+    private TextToSpeech        mTts;
     private AlertDialog.Builder mBuilder;
+    private String              mOcrString;
 
     private boolean             isBeeping = false;
     private boolean             beep      = false;
@@ -61,12 +67,14 @@ class VirtucaneView extends CvCameraView {
         mMediaPlayer = MediaPlayer.create(context, R.raw.sine);
         mMediaPlayer.setLooping(true);
 
+        // Initialize TextToSpeech
+        mTts = new TextToSpeech(context, this);
+
         // Initialize AlertDialog
         mBuilder = new AlertDialog.Builder(context);
-        mBuilder.setMessage("This text is a sample. OCR text would normally appear here.");
         mBuilder.setPositiveButton("Speak", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // TODO: Speak the OCR'd text
+                mTts.speak(mOcrString, TextToSpeech.QUEUE_ADD, null);
                 dialog.cancel();
             }
         });
@@ -75,6 +83,19 @@ class VirtucaneView extends CvCameraView {
                 dialog.cancel();
             }
         });
+    }
+
+    public void onInit(int status) {
+        Log.i(TAG, "onInit(" + status + ")");
+
+        if (status == TextToSpeech.SUCCESS) {
+            Log.i(TAG, "TextToSpeech successfully loaded");
+
+            if (mTts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
+                mTts.setLanguage(Locale.US);
+            } else Log.e(TAG, "Locale.US is unavailable");
+
+        } else Log.e(TAG, "TextToSpeech engine failed to load");
     }
 
     @Override
@@ -160,7 +181,7 @@ class VirtucaneView extends CvCameraView {
     @Override
     public void run() {
         super.run();
-        Log.i(TAG, "run() complete");
+        Log.i(TAG, "super.run() complete");
 
         synchronized (this) {
             // Explicitly deallocate Mats
@@ -173,8 +194,14 @@ class VirtucaneView extends CvCameraView {
             mTemp = null;
         }
     }
-    
+
     public void ocrFrame() {
+        Log.i(TAG, "ocrFrame()");
+
+        // TODO OCR the current frame
+        mOcrString = "This text is a sample. OCR text would normally appear here.";
+
+        mBuilder.setMessage(mOcrString);
         AlertDialog alert = mBuilder.create();
         alert.show();
     }

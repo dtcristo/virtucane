@@ -132,7 +132,6 @@ public abstract class CvCameraView extends SurfaceView implements SurfaceHolder.
                     Log.e(TAG, "mCamera.grab() failed");
                     break;
                 }
-
                 bmp = processFrame(mCamera);
             }
 
