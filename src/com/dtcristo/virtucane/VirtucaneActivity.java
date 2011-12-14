@@ -84,17 +84,8 @@ public class VirtucaneActivity extends Activity {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.i(TAG, "onKeyDown()");
-
-        switch (keyCode) {
-        }
-        return false;
-    }
-
-    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Log.i(TAG, "onKeyUp()");
+        Log.i(TAG, "onKeyUp(" + keyCode + ")");
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -103,5 +94,4 @@ public class VirtucaneActivity extends Activity {
         }
         return false;
     }
-
 }
