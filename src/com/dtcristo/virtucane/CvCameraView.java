@@ -39,10 +39,10 @@ public abstract class CvCameraView extends SurfaceView implements SurfaceHolder.
     private SurfaceHolder       mHolder;
     private VideoCapture        mCamera;
 
-    protected int               mFrameWidth;
-    protected int               mFrameHeight;
+    int                         mFrameWidth;
+    int                         mFrameHeight;
 
-    protected boolean           portrait = true;
+    boolean                     portrait = true;
 
     public CvCameraView(Context context) {
         super(context);
