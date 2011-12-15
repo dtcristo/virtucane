@@ -40,7 +40,8 @@ public class VirtucaneActivity extends Activity {
 
     public static int           viewMode            = VIEW_MODE_RGBA;
 
-    private VirtucaneView       mVirtucaneView;
+    //private VirtucaneView       mVirtucaneView;
+    private Preview             mPreview;
 
     private MenuItem            mMenuItemRgba;
     private MenuItem            mMenuItemThreshold;
@@ -57,8 +58,11 @@ public class VirtucaneActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate()");
 
-        mVirtucaneView = new VirtucaneView(this);
-        setContentView(mVirtucaneView);
+        //mVirtucaneView = new VirtucaneView(this);
+        //setContentView(mVirtucaneView);
+
+        mPreview = new Preview(this);
+        setContentView(mPreview);
     }
 
     @Override
@@ -94,7 +98,7 @@ public class VirtucaneActivity extends Activity {
         }
         return false;
     }
-    
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         Log.i(TAG, "onKeyUp(" + keyCode + ")");
