@@ -58,7 +58,6 @@ class VirtucaneView extends CameraView implements OnInitListener {
     private Mat                 mGraySubmat;
 
     private Mat                 mRgba;
-    //private Mat                 mGrey;
     private Mat                 mTemp;
 
     public VirtucaneView(Context context) {
@@ -111,7 +110,6 @@ class VirtucaneView extends CameraView implements OnInitListener {
             mGraySubmat = mYuv.submat(0, mFrameHeight, 0, mFrameWidth);
 
             mRgba = new Mat();
-            //mGrey = new Mat();
             mTemp = new Mat();
         }
     }
@@ -191,16 +189,14 @@ class VirtucaneView extends CameraView implements OnInitListener {
             // Explicitly deallocate Mats
             if (mYuv != null) mYuv.release();
             if (mGraySubmat != null) mGraySubmat.release();
-            
+
             if (mRgba != null) mRgba.release();
-            //if (mGrey != null) mGrey.release();
             if (mTemp != null) mTemp.release();
 
             mYuv = null;
             mGraySubmat = null;
-            
+
             mRgba = null;
-            //mGrey = null;
             mTemp = null;
         }
     }

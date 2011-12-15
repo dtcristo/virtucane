@@ -65,7 +65,7 @@ public abstract class CameraView extends SurfaceView implements SurfaceHolder.Ca
 
             mFrameWidth = width;
             mFrameHeight = height;
-            
+
             Log.i(TAG, "mFrameWidth = " + mFrameWidth);
             Log.i(TAG, "mFrameHeight = " + mFrameHeight);
 
@@ -139,8 +139,12 @@ public abstract class CameraView extends SurfaceView implements SurfaceHolder.Ca
 
             synchronized (this) {
                 try {
+                    // Wait until new mFrame is available.
                     this.wait();
+                    
+                    // Process the newly captured frame.
                     bmp = processFrame(mFrame);
+                    
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
