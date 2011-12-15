@@ -27,10 +27,11 @@ import java.util.Locale;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
+import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.AlertDialog;
@@ -43,8 +44,8 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-class VirtucaneView extends CameraView implements OnInitListener {
-    private static final String TAG       = "VirtucaneView";
+class VirtucaneCvView extends CvCameraView implements OnInitListener {
+    private static final String TAG       = "VirtucaneCvView";
 
     private MediaPlayer         mMediaPlayer;
     private TextToSpeech        mTts;
@@ -54,16 +55,13 @@ class VirtucaneView extends CameraView implements OnInitListener {
     private boolean             isBeeping = false;
     private boolean             beep      = false;
 
-    private Mat                 mYuv;
-    private Mat                 mGraySubmat;
-
     private Mat                 mRgba;
-    //private Mat                 mGrey;
+    private Mat                 mGrey;
     private Mat                 mTemp;
 
-    public VirtucaneView(Context context) {
+    public VirtucaneCvView(Context context) {
         super(context);
-        Log.i(TAG, "VirtucaneView()");
+        Log.i(TAG, "VirtucaneCvView()");
 
         // Initialize MediaPlayer
         mMediaPlayer = MediaPlayer.create(context, R.raw.sine);
@@ -107,32 +105,28 @@ class VirtucaneView extends CameraView implements OnInitListener {
 
         synchronized (this) {
             // Initialize Mats before usage
-            mYuv = new Mat(mFrameHeight + mFrameHeight / 2, mFrameWidth, CvType.CV_8UC1);
-            mGraySubmat = mYuv.submat(0, mFrameHeight, 0, mFrameWidth);
-
             mRgba = new Mat();
-            //mGrey = new Mat();
+            mGrey = new Mat();
             mTemp = new Mat();
         }
     }
 
     @Override
-    protected Bitmap processFrame(byte[] data) {
-
-        mYuv.put(0, 0, data);
+    protected Bitmap processFrame(VideoCapture capture) {
 
         switch (VirtucaneActivity.viewMode) {
 
             case VirtucaneActivity.VIEW_MODE_RGBA:
-                Imgproc.cvtColor(mYuv, mRgba, Imgproc.COLOR_YUV420sp2RGB, 4);
-                //if (portrait) rotate(mRgba);
+                capture.retrieve(mRgba, Highgui.CV_CAP_ANDROID_COLOR_FRAME_RGBA);
+                if (portrait) rotate(mRgba);
                 beep = false;
                 break;
 
             case VirtucaneActivity.VIEW_MODE_THRESHOLD:
-                if (portrait) rotate(mGraySubmat);
+                capture.retrieve(mGrey, Highgui.CV_CAP_ANDROID_GREY_FRAME);
+                if (portrait) rotate(mGrey);
 
-                Imgproc.threshold(mGraySubmat, mTemp, 80, 255, Imgproc.THRESH_BINARY);
+                Imgproc.threshold(mGrey, mTemp, 80, 255, Imgproc.THRESH_BINARY);
 
                 // 0 for black; 255 for white
                 int pixelValue = (int) mTemp.get(mFrameHeight / 2, mFrameWidth / 2)[0];
@@ -144,14 +138,16 @@ class VirtucaneView extends CameraView implements OnInitListener {
                 break;
 
             case VirtucaneActivity.VIEW_MODE_GREY:
-                //if (portrait) rotate(mGraySubmat);
+                capture.retrieve(mGrey, Highgui.CV_CAP_ANDROID_GREY_FRAME);
+                if (portrait) rotate(mGrey);
                 beep = false;
-                Imgproc.cvtColor(mGraySubmat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
+                Imgproc.cvtColor(mGrey, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
                 break;
 
             case VirtucaneActivity.VIEW_MODE_CANNY:
-                //if (portrait) rotate(mGraySubmat);
-                Imgproc.Canny(mGraySubmat, mTemp, 80, 100);
+                capture.retrieve(mGrey, Highgui.CV_CAP_ANDROID_GREY_FRAME);
+                if (portrait) rotate(mGrey);
+                Imgproc.Canny(mGrey, mTemp, 80, 100);
                 beep = false;
                 Imgproc.cvtColor(mTemp, mRgba, Imgproc.COLOR_GRAY2BGRA, 4);
                 break;
@@ -170,8 +166,8 @@ class VirtucaneView extends CameraView implements OnInitListener {
             }
         }
 
-        // Draw blue reticle
-        Core.circle(mRgba, new Point(mFrameWidth / 2, mFrameHeight / 2), 8, new Scalar(0, 0, 255,
+        // Draw red reticle
+        Core.circle(mRgba, new Point(mFrameWidth / 2, mFrameHeight / 2), 8, new Scalar(255, 0, 0,
                                                                                        255));
 
         Bitmap bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
@@ -189,18 +185,12 @@ class VirtucaneView extends CameraView implements OnInitListener {
 
         synchronized (this) {
             // Explicitly deallocate Mats
-            if (mYuv != null) mYuv.release();
-            if (mGraySubmat != null) mGraySubmat.release();
-            
             if (mRgba != null) mRgba.release();
-            //if (mGrey != null) mGrey.release();
+            if (mGrey != null) mGrey.release();
             if (mTemp != null) mTemp.release();
 
-            mYuv = null;
-            mGraySubmat = null;
-            
             mRgba = null;
-            //mGrey = null;
+            mGrey = null;
             mTemp = null;
         }
     }
@@ -219,6 +209,6 @@ class VirtucaneView extends CameraView implements OnInitListener {
     /** Rotates a matrix 90 degrees clockwise. */
     private static void rotate(Mat mat) {
         Core.transpose(mat, mat);
-        Core.flip(mat, mat, 0);
+        Core.flip(mat, mat, 1);
     }
 }
