@@ -84,12 +84,24 @@ public class VirtucaneActivity extends Activity {
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.i(TAG, "onKeyDown(" + keyCode + ")");
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                // TODO Autofocus camera
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         Log.i(TAG, "onKeyUp(" + keyCode + ")");
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                mVirtucaneView.ocrFrame();
+                //mVirtucaneView.ocrFrame();
                 return true;
         }
         return false;

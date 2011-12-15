@@ -6,7 +6,7 @@ An assistive "virtual cane" Android app for the visually impaired.
 License
 =======
 
-Virtucane is licensed under the [GNU General Public License](http://www.gnu.org/copyleft/gpl.html).
+Virtucane is licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html).
 
 	/* 
 	 * Copyright (C) 2011  David Cristofaro
