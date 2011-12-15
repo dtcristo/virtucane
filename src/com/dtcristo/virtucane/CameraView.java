@@ -38,12 +38,12 @@ public abstract class CameraView extends SurfaceView implements SurfaceHolder.Ca
     private static final String TAG      = "CameraView";
 
     private SurfaceHolder       mHolder;
-    protected Camera            mCamera;
+    Camera                      mCamera;
 
-    protected int               mFrameWidth;
-    protected int               mFrameHeight;
+    int                         mFrameWidth;
+    int                         mFrameHeight;
 
-    protected boolean           portrait = true;
+    boolean                     portrait = true;
 
     private byte[]              mFrame;
     private boolean             mThreadRun;
@@ -141,10 +141,10 @@ public abstract class CameraView extends SurfaceView implements SurfaceHolder.Ca
                 try {
                     // Wait until new mFrame is available.
                     this.wait();
-                    
+
                     // Process the newly captured frame.
                     bmp = processFrame(mFrame);
-                    
+
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

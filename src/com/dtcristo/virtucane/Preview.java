@@ -22,12 +22,20 @@ import java.util.List;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 class Preview extends SurfaceView implements SurfaceHolder.Callback {
-    SurfaceHolder mHolder;
-    Camera        mCamera;
+    private static final String TAG = "Preview";
+
+    private SurfaceHolder       mHolder;
+    Camera                      mCamera;
+
+    int                         mFrameWidth;
+    int                         mFrameHeight;
+
+    private byte[]              mFrame;
 
     Preview(Context context) {
         super(context);
@@ -45,10 +53,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
         mCamera = Camera.open();
         try {
             mCamera.setPreviewDisplay(holder);
-        } catch (IOException exception) {
+        } catch (IOException e) {
+            Log.e(TAG, "mCamera.setPreviewDisplay() fails: " + e);
             mCamera.release();
             mCamera = null;
-            // TODO: add more exception handling logic here
         }
     }
 
@@ -105,10 +113,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
         List<Size> sizes = parameters.getSupportedPreviewSizes();
         Size optimalSize = getOptimalPreviewSize(sizes, w, h);
-        parameters.setPreviewSize(optimalSize.width, optimalSize.height);
+
+        mFrameWidth = optimalSize.width;
+        mFrameHeight = optimalSize.height;
+
+        parameters.setPreviewSize(mFrameWidth, mFrameHeight);
 
         mCamera.setParameters(parameters);
         mCamera.startPreview();
     }
-
 }

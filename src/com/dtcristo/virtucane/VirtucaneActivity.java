@@ -33,12 +33,12 @@ import android.view.MenuItem;
 public class VirtucaneActivity extends Activity {
     private static final String TAG                 = "VirtucaneActivity";
 
-    public static final int     VIEW_MODE_RGBA      = 0;
-    public static final int     VIEW_MODE_THRESHOLD = 1;
-    public static final int     VIEW_MODE_GREY      = 2;
-    public static final int     VIEW_MODE_CANNY     = 3;
+    static final int            VIEW_MODE_RGBA      = 0;
+    static final int            VIEW_MODE_THRESHOLD = 1;
+    static final int            VIEW_MODE_GREY      = 2;
+    static final int            VIEW_MODE_CANNY     = 3;
 
-    public static int           viewMode            = VIEW_MODE_RGBA;
+    static int                  viewMode            = VIEW_MODE_RGBA;
 
     //private VirtucaneView       mVirtucaneView;
     private Preview             mPreview;
