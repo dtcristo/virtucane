@@ -24,142 +24,104 @@
 package com.dtcristo.virtucane;
 
 import java.io.IOException;
+import java.util.List;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public abstract class CameraView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
-    private static final String TAG      = "CameraView";
+class CameraView extends SurfaceView implements SurfaceHolder.Callback {
+    private static final String TAG = "CameraView";
 
     private SurfaceHolder       mHolder;
     Camera                      mCamera;
+    ImageProcessor              mProcessor;
 
-    int                         mFrameWidth;
-    int                         mFrameHeight;
-
-    boolean                     portrait = true;
-
-    private byte[]              mFrame;
-    private boolean             mThreadRun;
-
-    public CameraView(Context context) {
+    CameraView(Context context) {
         super(context);
         Log.i(TAG, "CameraView()");
 
         mHolder = getHolder();
         mHolder.addCallback(this);
-    }
+        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-    public void surfaceChanged(SurfaceHolder _holder, int format, int width, int height) {
-        Log.i(TAG, "surfaceChanged()");
-
-        if (mCamera != null) {
-
-            Camera.Parameters params = mCamera.getParameters();
-
-            mFrameWidth = width;
-            mFrameHeight = height;
-
-            Log.i(TAG, "mFrameWidth = " + mFrameWidth);
-            Log.i(TAG, "mFrameHeight = " + mFrameHeight);
-
-            // List<Camera.Size> sizes = params.getSupportedPreviewSizes();
-
-            // selecting optimal camera preview size
-            // {
-            // double minDiff = Double.MAX_VALUE;
-            // for (Camera.Size size : sizes) {
-            // if (Math.abs(size.height - height) < minDiff) {
-            // mFrameWidth = size.width;
-            // mFrameHeight = size.height;
-            // minDiff = Math.abs(size.height - height);
-            // }
-            // }
-            // }
-
-            if (portrait) {
-                params.setPreviewSize(mFrameHeight, mFrameWidth);
-            } else {
-                params.setPreviewSize(mFrameWidth, mFrameHeight);
-            }
-
-            mCamera.setParameters(params);
-            try {
-                mCamera.setPreviewDisplay(null);
-            } catch (IOException e) {
-                Log.e(TAG, "mCamera.setPreviewDisplay() fails: " + e);
-            }
-            mCamera.startPreview();
-        }
+        // Used for processing individual frames.
+        mProcessor = new ImageProcessor(context);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
         Log.i(TAG, "surfaceCreated()");
 
         mCamera = Camera.open();
-        mCamera.setPreviewCallback(new PreviewCallback() {
-            public void onPreviewFrame(byte[] data, Camera camera) {
-                synchronized (CameraView.this) {
-                    mFrame = data;
-                    CameraView.this.notify();
-                }
-            }
-        });
-        (new Thread(this)).start();
+        mCamera.setPreviewCallback(mProcessor);
+        try {
+            mCamera.setPreviewDisplay(holder);
+        } catch (IOException e) {
+            Log.e(TAG, "mCamera.setPreviewDisplay() fails: " + e);
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        Log.i(TAG, "surfaceChanged()");
+
+        // Portrait orientation.
+        mCamera.setDisplayOrientation(90);
+
+        Camera.Parameters parameters = mCamera.getParameters();
+        List<Size> sizes = parameters.getSupportedPreviewSizes();
+        Size optimalSize = getOptimalPreviewSize(sizes, w, h);
+
+        int width = optimalSize.width;
+        int height = optimalSize.height;
+
+        parameters.setPreviewSize(width, height);
+        mCamera.setParameters(parameters);
+        mCamera.startPreview();
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.i(TAG, "surfaceDestroyed()");
 
-        mThreadRun = false;
-        if (mCamera != null) {
-            synchronized (this) {
-                mCamera.stopPreview();
-                mCamera.setPreviewCallback(null);
-                mCamera.release();
-                mCamera = null;
-            }
-        }
+        mCamera.stopPreview();
+        mCamera.release();
+        mCamera = null;
     }
 
-    protected abstract Bitmap processFrame(byte[] data);
+    private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
+        Log.i(TAG, "getOptimalPreviewSize()");
 
-    public void run() {
-        Log.i(TAG, "run()");
+        final double ASPECT_TOLERANCE = 0.05;
+        double targetRatio = (double) w / h;
+        if (sizes == null) return null;
 
-        mThreadRun = true;
-        while (mThreadRun) {
-            Bitmap bmp = null;
+        Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
 
-            synchronized (this) {
-                try {
-                    // Wait until new mFrame is available.
-                    this.wait();
+        int targetHeight = h;
 
-                    // Process the newly captured frame.
-                    bmp = processFrame(mFrame);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (bmp != null) {
-                Canvas canvas = mHolder.lockCanvas();
-                if (canvas != null) {
-                    canvas.drawBitmap(bmp, (canvas.getWidth() - mFrameWidth) / 2,
-                                      (canvas.getHeight() - mFrameHeight) / 2, null);
-                    mHolder.unlockCanvasAndPost(canvas);
-                }
-                bmp.recycle();
+        for (Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
             }
         }
-        Log.i(TAG, "run() complete");
+
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Size size : sizes) {
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+        }
+        return optimalSize;
     }
 }
