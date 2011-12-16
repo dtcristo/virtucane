@@ -37,32 +37,21 @@ public class VirtucaneActivity extends Activity {
     static final int            VIEW_MODE_THRESHOLD = 1;
     static final int            VIEW_MODE_GREY      = 2;
     static final int            VIEW_MODE_CANNY     = 3;
-
-    static int                  viewMode            = VIEW_MODE_RGBA;
-
-    //private VirtucaneView       mVirtucaneView;
-    private Preview             mPreview;
-
     private MenuItem            mMenuItemRgba;
     private MenuItem            mMenuItemThreshold;
     private MenuItem            mMenuItemGrey;
     private MenuItem            mMenuItemCanny;
+    static int                  viewMode            = VIEW_MODE_RGBA;
 
-    public VirtucaneActivity() {
-        Log.i(TAG, "VirtualCaneActivity()");
-    }
+    private CameraView          mCameraView;
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate()");
 
-        //mVirtucaneView = new VirtucaneView(this);
-        //setContentView(mVirtucaneView);
-
-        mPreview = new Preview(this);
-        setContentView(mPreview);
+        mCameraView = new CameraView(this);
+        setContentView(mCameraView);
     }
 
     @Override
@@ -93,7 +82,8 @@ public class VirtucaneActivity extends Activity {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                // TODO Autofocus camera
+                // Start autofocus.
+                mCameraView.mCamera.autoFocus(mCameraView.mProcessor);
                 return true;
         }
         return false;
@@ -105,7 +95,6 @@ public class VirtucaneActivity extends Activity {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                //mVirtucaneView.ocrFrame();
                 return true;
         }
         return false;
