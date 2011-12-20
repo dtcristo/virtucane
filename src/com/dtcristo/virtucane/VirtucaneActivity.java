@@ -81,20 +81,18 @@ public class VirtucaneActivity extends Activity {
         Log.i(TAG, "onKeyDown(" + keyCode + ")");
 
         switch (keyCode) {
+            
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 // Start autofocus.
                 mCameraView.mCamera.autoFocus(mCameraView.mProcessor);
                 return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Log.i(TAG, "onKeyUp(" + keyCode + ")");
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
+                
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                //mCameraView.toggleAwbLock(this);
+                return true;
+                
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                //mCameraView.toggleAeLock(this);
                 return true;
         }
         return false;
