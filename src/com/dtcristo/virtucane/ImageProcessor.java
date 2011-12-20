@@ -34,6 +34,7 @@ public class ImageProcessor implements PreviewCallback, AutoFocusCallback {
 
     private OutputHandler       mHandler;
     
+    @SuppressWarnings("unused")
     private byte[]              mFrame;
 
     public ImageProcessor(Context context) {
@@ -114,9 +115,8 @@ public class ImageProcessor implements PreviewCallback, AutoFocusCallback {
 
     public void onAutoFocus(boolean success, Camera camera) {
         Log.i(TAG, "onAutoFocus()");
-        
-        // TODO Respond to an autofocus completion.
-        //ocrFrame();
+
+        ocrFrame();
     }
     
     public void ocrFrame() {

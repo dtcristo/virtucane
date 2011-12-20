@@ -40,6 +40,10 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     Camera                      mCamera;
     ImageProcessor              mProcessor;
 
+    /*private boolean             aeLock  = false;
+    private boolean             awbLock = false;
+    private Toast               mToast;*/
+
     CameraView(Context context) {
         super(context);
         Log.i(TAG, "CameraView()");
@@ -72,15 +76,15 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         // Portrait orientation.
         mCamera.setDisplayOrientation(90);
 
-        Camera.Parameters parameters = mCamera.getParameters();
-        List<Size> sizes = parameters.getSupportedPreviewSizes();
+        Camera.Parameters params = mCamera.getParameters();
+        List<Size> sizes = params.getSupportedPreviewSizes();
         Size optimalSize = getOptimalPreviewSize(sizes, w, h);
 
         int width = optimalSize.width;
         int height = optimalSize.height;
 
-        parameters.setPreviewSize(width, height);
-        mCamera.setParameters(parameters);
+        params.setPreviewSize(width, height);
+        mCamera.setParameters(params);
         mCamera.startPreview();
     }
 
@@ -124,4 +128,50 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         }
         return optimalSize;
     }
+
+    /*public void toggleAwbLock(Context context) {
+        Log.i(TAG, "toggleAwbLock()");
+
+        Camera.Parameters params = mCamera.getParameters();
+        if (params.isAutoWhiteBalanceLockSupported()) {
+            if (awbLock) {
+                params.setAutoWhiteBalanceLock(false);
+                awbLock = false;
+                mToast.cancel();
+                mToast = Toast.makeText(context, "AWB lock off", Toast.LENGTH_SHORT);
+                mToast.show();
+            }
+            else {
+                params.setAutoWhiteBalanceLock(true);
+                awbLock = true;
+                mToast.cancel();
+                mToast = Toast.makeText(context, "AWB lock on", Toast.LENGTH_SHORT);
+                mToast.show();
+            }
+            mCamera.setParameters(params);
+        }
+    }*/
+
+    /*public void toggleAeLock(Context context) {
+        Log.i(TAG, "toggleAeLock()");
+        
+        Camera.Parameters params = mCamera.getParameters();
+        if (params.isAutoExposureLockSupported()) {
+            if (aeLock) {
+                params.setAutoExposureLock(false);
+                aeLock = false;
+                mToast.cancel();
+                mToast = Toast.makeText(context, "AE lock off", Toast.LENGTH_SHORT);
+                mToast.show();
+            }
+            else {
+                params.setAutoExposureLock(true);
+                aeLock = true;
+                mToast.cancel();
+                mToast = Toast.makeText(context, "AE lock on", Toast.LENGTH_SHORT);
+                mToast.show();
+            }
+            mCamera.setParameters(params);
+        }
+    }*/
 }
