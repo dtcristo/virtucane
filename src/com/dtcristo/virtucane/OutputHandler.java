@@ -83,4 +83,17 @@ public class OutputHandler implements OnInitListener {
         AlertDialog dialog = mBuilder.create();
         dialog.show();
     }
+    
+    /* Play sound
+    if (isBeeping) {
+        if (!beep) {
+            isBeeping = false;
+            mMediaPlayer.pause();
+        }
+    } else {
+        if (beep) {
+            isBeeping = true;
+            mMediaPlayer.start();
+        }
+    }*/
 }
