@@ -77,6 +77,11 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         int width = optimalSize.width;
         int height = optimalSize.height;
 
+        // Video autofocus.
+        // TODO: Change to FOCUS_MODE_CONTINUOUS_PICTURE with API Level 14.
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        mCamera.setParameters(params);
+        
         params.setPreviewSize(width, height);
         mCamera.setParameters(params);
         mCamera.startPreview();
