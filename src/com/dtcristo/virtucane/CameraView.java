@@ -30,9 +30,12 @@ import android.view.SurfaceView;
 class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "CameraView";
 
+    ImageProcessor              mProcessor;
     private SurfaceHolder       mHolder;
     Camera                      mCamera;
-    ImageProcessor              mProcessor;
+
+    private int                 mWidth;
+    private int                 mHeight;
 
     /*private boolean             aeLock  = false;
     private boolean             awbLock = false;
@@ -42,12 +45,11 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         super(context);
         Log.i(TAG, "CameraView()");
 
+        mProcessor = new ImageProcessor(context);
+
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
-        // Used for processing individual frames.
-        mProcessor = new ImageProcessor(context);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -62,6 +64,8 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
             mCamera.release();
             mCamera = null;
         }
+        // Start the processing thread.
+        (new Thread(mProcessor)).start();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -74,15 +78,15 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         List<Size> sizes = params.getSupportedPreviewSizes();
         Size optimalSize = getOptimalPreviewSize(sizes, w, h);
 
-        int width = optimalSize.width;
-        int height = optimalSize.height;
+        mWidth = optimalSize.width;
+        mHeight = optimalSize.height;
 
         // Video autofocus.
         // TODO: Change to FOCUS_MODE_CONTINUOUS_PICTURE with API Level 14.
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        mCamera.setParameters(params);
-        
-        params.setPreviewSize(width, height);
+        //params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        //mCamera.setParameters(params);
+
+        params.setPreviewSize(mWidth, mHeight);
         mCamera.setParameters(params);
         mCamera.startPreview();
     }
@@ -128,6 +132,7 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         return optimalSize;
     }
 
+    // TODO: Uncomment with API Level 14.
     /*public void toggleAwbLock(Context context) {
         Log.i(TAG, "toggleAwbLock()");
 
