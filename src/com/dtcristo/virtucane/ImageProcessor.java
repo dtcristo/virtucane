@@ -17,33 +17,108 @@
 
 package com.dtcristo.virtucane;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.Date;
+
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
+import android.os.Environment;
 import android.util.Log;
 
-public class ImageProcessor implements PreviewCallback, AutoFocusCallback {
-    private static final String TAG = "ImageProcessor";
+public class ImageProcessor implements PreviewCallback, AutoFocusCallback, Runnable {
+    private static final String TAG        = "ImageProcessor";
 
+    private Date                mDate;
     private OutputHandler       mHandler;
-    
-    @SuppressWarnings("unused")
+
     private byte[]              mFrame;
+    private Camera              mCamera;
+
+    private boolean             mThreadRun;
+    private boolean             mSaveFrame = false;
+    private int                 count      = 0;
+
+    //private Mat                 mYuv;
+    //private Mat                 mRgba;
 
     public ImageProcessor(Context context) {
         Log.i(TAG, "ImageProcessor()");
 
+        mDate = new Date();
         mHandler = new OutputHandler(context);
+
+        //mYuv = new Mat(mHeight + mHeight / 2, mWidth, CvType.CV_8UC1);
+        //mRgba = new Mat();
     }
 
     public void onPreviewFrame(byte[] data, Camera camera) {
-        mFrame = data;
-        // TODO Deal with the current frame.
+
+        synchronized (ImageProcessor.this) {
+            mFrame = data;
+            mCamera = camera;
+            ImageProcessor.this.notify();
+        }
     }
 
-    /*protected Bitmap processFrame(byte[] data) {
+    private void processFrame(byte[] data, Camera camera) {
 
+        count++;
+        Log.i(TAG, "Processing frame No. " + count);
+
+        /*
+        try {
+            Camera.Parameters param = camera.getParameters();
+            Size size = param.getPreviewSize();
+            YuvImage yuv = new YuvImage(data, param.getPreviewFormat(), size.width,
+                                        size.height, null);
+            String path = Environment.getExternalStorageDirectory().toString();
+            File file = new File(path + "/" + date.getTime() + ".jpg");
+            FileOutputStream out = new FileOutputStream(file);
+            yuv.compressToJpeg(new Rect(0, 0, yuv.getWidth(), yuv.getHeight()), 90, out);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, e.getMessage());
+        }*/
+
+        /*
+        if (saveFlag) {
+            Log.i(TAG, "saveFlag = true");
+
+            mYuv.put(0, 0, mFrame);
+            Log.i(TAG, "mYuv.put()");
+
+            Imgproc.cvtColor(mYuv, mRgba, Imgproc.COLOR_YUV420sp2RGB, 4);
+            Log.i(TAG, "Imgproc.cvtColor()");
+
+            Bitmap bmp = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+            Log.i(TAG, "Bitmap.createBitmap()");
+
+            Utils.matToBitmap(mRgba, bmp);
+            Log.i(TAG, "matToBitmap()");
+
+            String path = Environment.getExternalStorageDirectory().toString();
+            Log.i(TAG, "Output path: " + path);
+
+            try {
+                File file = new File(path, date.getTime() + ".png");
+                FileOutputStream out = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            saveFlag = false;
+        }*/
+
+        /*
         mYuv.put(0, 0, data);
 
         switch (VirtucaneActivity.viewMode) {
@@ -104,21 +179,51 @@ public class ImageProcessor implements PreviewCallback, AutoFocusCallback {
         if (Utils.matToBitmap(mRgba, bmp)) return bmp;
 
         bmp.recycle();
-        return null;
-    }*/
+        return null;*/
+    }
 
     public void onAutoFocus(boolean success, Camera camera) {
         Log.i(TAG, "onAutoFocus()");
 
-        ocrFrame();
+        mSaveFrame = true;
+        //ocrFrame();
     }
-    
+
     public void ocrFrame() {
         Log.i(TAG, "ocrFrame()");
 
         // TODO OCR the current frame
-        
+
         String ocrResult = "This text is a sample. OCR text would normally appear here.";
         mHandler.showOcrDialog(ocrResult);
+    }
+
+    public void run() {
+        mThreadRun = true;
+        Log.i(TAG, "Starting processing thread");
+        while (mThreadRun) {
+            //Bitmap bmp = null;
+
+            synchronized (this) {
+                try {
+                    this.wait();
+                    processFrame(mFrame, mCamera);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // displaying result
+            /*
+            if (bmp != null) {
+                Canvas canvas = mHolder.lockCanvas();
+                if (canvas != null) {
+                    canvas.drawBitmap(bmp, (canvas.getWidth() - getFrameWidth()) / 2,
+                                      (canvas.getHeight() - getFrameHeight()) / 2, null);
+                    mHolder.unlockCanvasAndPost(canvas);
+                }
+                bmp.recycle();
+            }*/
+        }
     }
 }
