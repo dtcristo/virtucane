@@ -72,7 +72,7 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         Log.i(TAG, "surfaceChanged()");
 
         // Portrait orientation.
-        mCamera.setDisplayOrientation(90);
+        //mCamera.setDisplayOrientation(90);
 
         Camera.Parameters params = mCamera.getParameters();
         List<Size> sizes = params.getSupportedPreviewSizes();
