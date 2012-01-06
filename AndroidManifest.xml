@@ -26,7 +26,7 @@
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
             android:name=".VirtucaneActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
