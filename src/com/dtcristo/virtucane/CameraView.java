@@ -30,9 +30,10 @@ import android.view.SurfaceView;
 class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "CameraView";
 
-    ImageProcessor              mProcessor;
+    private Context             mContext;
     private SurfaceHolder       mHolder;
     Camera                      mCamera;
+    ImageProcessor              mProcessor;
 
     private int                 mWidth;
     private int                 mHeight;
@@ -44,33 +45,22 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     CameraView(Context context) {
         super(context);
         Log.i(TAG, "CameraView()");
-
-        mProcessor = new ImageProcessor(context);
-
+        
+        mContext = context;
         mHolder = getHolder();
         mHolder.addCallback(this);
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        //mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
         Log.i(TAG, "surfaceCreated()");
-
-        mCamera = Camera.open();
-        mCamera.setPreviewCallback(mProcessor);
-        try {
-            mCamera.setPreviewDisplay(holder);
-        } catch (IOException e) {
-            Log.e(TAG, "mCamera.setPreviewDisplay() fails: " + e);
-            mCamera.release();
-            mCamera = null;
-        }
-        // Start the processing thread.
-        (new Thread(mProcessor)).start();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.i(TAG, "surfaceChanged()");
 
+        mCamera = Camera.open();
+        
         // Portrait orientation.
         //mCamera.setDisplayOrientation(90);
 
@@ -80,12 +70,25 @@ class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 
         mWidth = optimalSize.width;
         mHeight = optimalSize.height;
-
+        
+        mProcessor = new ImageProcessor(mContext, mHolder, mWidth, mHeight);
+        
+        mCamera.setPreviewCallback(mProcessor);
+        /*try {
+            mCamera.setPreviewDisplay(holder);
+        } catch (IOException e) {
+            Log.e(TAG, "mCamera.setPreviewDisplay() fails: " + e);
+            mCamera.release();
+            mCamera = null;
+        }*/
+        // Start the processing thread.
+        (new Thread(mProcessor)).start();
+        
         // Video autofocus.
         // TODO: Change to FOCUS_MODE_CONTINUOUS_PICTURE with API Level 14.
         //params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
         //mCamera.setParameters(params);
-
+        
         params.setPreviewSize(mWidth, mHeight);
         mCamera.setParameters(params);
         mCamera.startPreview();
