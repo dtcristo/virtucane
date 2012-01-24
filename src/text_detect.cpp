@@ -530,8 +530,8 @@ DetectText::identifyLetters(const Mat& swtmap, const Mat& ccmap)
 
 		isLetter = isLetter && (variance/mean < 1.5);
 
-		isLetter = isLetter && (sqrt((pow(itr->width,2) + 
-						pow(itr->height,2)))
+		isLetter = isLetter && (sqrt((pow((double)(itr->width),2) + 
+						pow((double)(itr->height),2)))
 				/maxStrokeWidth < 10);
 
 
@@ -616,10 +616,10 @@ DetectText::groupLetters(const Mat& swtmap, const Mat& ccmap)
 			}
 
 			// rule 3: distance between characters
-			float distance = sqrt(pow(iRect.x + iRect.width/2 - 
-						jRect.x - jRect.width/2,2) +
-					pow(iRect.y + iRect.height/2 - 
-						jRect.y - jRect.height/2,2));
+			float distance = sqrt(pow((double)(iRect.x + iRect.width/2 - 
+						jRect.x - jRect.width/2),2) +
+					pow((double)(iRect.y + iRect.height/2 - 
+						jRect.y - jRect.height/2),2));
 			int distanceRatio = 4;
 			if (horizontal)
 			{
