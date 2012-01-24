@@ -8,8 +8,8 @@ def filelist(thepath):
 				add perform text detection	'''
 	dirlist = os.listdir(thepath)
 	executeBin = "$(rospack find read_text)/bin/run_detect "
-	correlation = "$(rospack find read_text)/fonts/correlation.txt"
-	dictionary = "$(rospack find read_text)/dictionary/full-dictionary"
+	correlation = " $(rospack find read_text)/fonts/correlation.txt"
+	dictionary = " $(rospack find read_text)/dictionary/full-dictionary"
 	print "current directory:" + thepath
 	for name in dirlist:
 		absolutePath = os.path.join(thepath,name)
