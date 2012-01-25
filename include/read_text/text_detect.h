@@ -7,8 +7,7 @@
 using namespace cv;
 using namespace std;
 
-class DetectText
-{
+class DetectText {
 public:
 	DetectText();
 	~DetectText();
@@ -28,10 +27,10 @@ public:
 	vector<string>& getWords();
 
 	/* tests */
-	
+
 	void testMergePairs();
-	
-	void testEditDistance();	
+
+	void testEditDistance();
 
 	void testGetCorrelationIndex();
 
@@ -39,46 +38,40 @@ public:
 
 private:
 	/* internal structures */
-	enum Mode
-	{
-		IMAGE = 1,
-		STREAM = 2
+	enum Mode {
+		IMAGE = 1, STREAM = 2
 	};
 
-	enum FontColor
-	{
-		BRIGHT = 1,
-		DARK = 2
+	enum FontColor {
+		BRIGHT = 1, DARK = 2
 	};
 
-	enum Purpose
-	{
-		UPDATE = 1,
-		REFINE = 2
-	};
-	
-	enum Result
-	{
-		COARSE = 1,
-		FINE = 2
+	enum Purpose {
+		UPDATE = 1, REFINE = 2
 	};
 
-	struct Pair
-	{
-		Pair(int left, int right)
-			:left(left),right(right){}
+	enum Result {
+		COARSE = 1, FINE = 2
+	};
+
+	struct Pair {
+		Pair(int left, int right) :
+				left(left), right(right) {
+		}
 		int left;
 		int right;
 	};
 
-	struct Word
-	{
-		Word():word(),score(1000){}
-		Word(string word, float score)
-			:word(word),score(score){}
+	struct Word {
+		Word() :
+				word(), score(1000) {
+		}
+		Word(string word, float score) :
+				word(word), score(score) {
+		}
 		string word;
-		float score;	
-	};	
+		float score;
+	};
 
 	/* pipeline for detecting black/white words*/
 	void detect();
@@ -90,31 +83,29 @@ private:
 	void disposal();
 
 	void strokeWidthTransform(const Mat &image, Mat &swtmap,
-				int searchDirection);
-	
+			int searchDirection);
+
 	/* for each edge point, search along gradient 
 	 * direction compute stroke width
 	 * searchDirection: 1 for along gradient, -1 for opposite
 	 * purpose: 1 for compute, 2 for refine
 	 */
 	void updateStrokeWidth(Mat &swtmap, vector<Point> &startPoints,
-				vector<Point> &strokePoints,
-				int searchDirection, Purpose purpose);
+			vector<Point> &strokePoints, int searchDirection, Purpose purpose);
 
 	int connectComponentAnalysis(const Mat& swtmap, Mat& ccmap);
-	
+
 	void identifyLetters(const Mat& swtmap, const Mat& ccmap);
-	
+
 	void groupLetters(const Mat& swtmap, const Mat& ccmap);
 
 	void chainPairs(Mat& ccmap);
-	
-	void filterBoundingBoxes(vector<Rect>& boundingBoxes, Mat& ccmap, 
-				int rejectRatio);
-	
-	void chainToBox(vector< vector<int> >& chain,
-			vector<Rect>& boundingBox);
-	
+
+	void filterBoundingBoxes(vector<Rect>& boundingBoxes, Mat& ccmap,
+			int rejectRatio);
+
+	void chainToBox(vector<vector<int> >& chain, vector<Rect>& boundingBox);
+
 	void overlapBoundingBoxes(vector<Rect>& boundingBoxes);
 
 	void overlayText(vector<Rect>& box, vector<string>& text);
@@ -123,35 +114,31 @@ private:
 
 	float ocrRead(const Mat& imagePatch, string& output);
 
-	float spellCheck(string& str,string& output, int method);
+	float spellCheck(string& str, string& output, int method);
 
-	Mat filterPatch(const Mat& patch);	
+	Mat filterPatch(const Mat& patch);
 
 	// helper functions
-	int ImageAdjust(IplImage* src, IplImage* dst,
-			double low, double high,
-			double bottom, double top,
-			double gamma);
+	int ImageAdjust(IplImage* src, IplImage* dst, double low, double high,
+			double bottom, double top, double gamma);
 
 	int countInnerLetterCandidates(bool* array);
-	
-	float getMeanIntensity(const Mat& ccmap, const Rect& rect, 
-							int element);
-	
-	float getMedianStrokeWidth(const Mat& ccmap, const Mat& swtmap,	
-				const Rect& rect, int element);
-	
-	void mergePairs(const vector<Pair>& groups,
-			vector< vector<int> >& chains);
-	
-	bool mergePairs(const vector< vector<int> >& initialChains,
-			vector< vector<int> >& chains);
-											 	
+
+	float getMeanIntensity(const Mat& ccmap, const Rect& rect, int element);
+
+	float getMedianStrokeWidth(const Mat& ccmap, const Mat& swtmap,
+			const Rect& rect, int element);
+
+	void mergePairs(const vector<Pair>& groups, vector<vector<int> >& chains);
+
+	bool mergePairs(const vector<vector<int> >& initialChains,
+			vector<vector<int> >& chains);
+
 	void merge(const vector<int>& token, vector<int>& chain);
 
 	static int editDistance(const string& s, const string& t);
 
-	float editDistanceFont(const string& s, const string& t);	
+	float editDistanceFont(const string& s, const string& t);
 
 	int getCorrelationIndex(char letter);
 
@@ -169,21 +156,21 @@ private:
 	void showEdgeMap();
 
 	void showCcmap(Mat& ccmap);
-	
+
 	void showSwtmap(Mat& swtmap);
-	
+
 	void showLetterDetection();
-	
+
 	void showLetterGroup();
-	
+
 	void showBoundingBoxes(vector<Rect>& boxes);
-	
+
 	void showBoundingBoxes(vector<Rect>& boxes, vector<bool>& text);
 	// tests
 	void testEdgePoints(vector<Point> &edgepoints);
-	
+
 	/***** variables *******/
-	
+
 	// these variables stays for the same image
 	Mat originalImage_;
 	Mat image_; // gray scale to be processed
@@ -195,7 +182,7 @@ private:
 	bool firstPass_; //  white: 1, black : 0 
 	vector<Point> edgepoints_;
 
-	Mat correlation_;	// read from arg[1]
+	Mat correlation_; // read from arg[1]
 	vector<string> wordList_; // read from arg[2]
 	Mode mode_; // streaming or images
 
@@ -212,26 +199,27 @@ private:
 	bool *isLetterComponects_;
 	bool *isGrouped_;
 	vector<bool*> innerComponents_;
-	
+
 	vector<Pair> horizontalLetterGroups_;
 	vector<Pair> verticalLetterGroups_;
-	vector< vector<int> > horizontalChains_; 
-	vector< vector<int> > verticalChains_; 
+	vector<vector<int> > horizontalChains_;
+	vector<vector<int> > verticalChains_;
 
 	vector<Rect> boundingBoxes_;
-	
+
 	float *componentsMeanIntensity_;
 	float *componentsMedianStrokeWidth_;
-	
+
 	size_t nComponent_;
 	float maxLetterHeight_;
 	float minLetterHeight_;
-	
+
 	string filename_;
 	string outputPrefix_;
-	
+
 	int textDisplayOffset_;
 
 };
 
 #endif
+
