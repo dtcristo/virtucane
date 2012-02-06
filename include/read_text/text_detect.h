@@ -166,6 +166,13 @@ private:
 	void showBoundingBoxes(vector<Rect>& boxes);
 
 	void showBoundingBoxes(vector<Rect>& boxes, vector<bool>& text);
+
+	// Added by David Cristofaro
+	void showMeanStrokeWidth(vector<Rect>& boxes);
+
+	// Added by David Cristofaro
+	float getMeanStrokeWidth(const Mat& ccmap, const Mat& swtmap, const Rect& rect);
+
 	// tests
 	void testEdgePoints(vector<Point> &edgepoints);
 
@@ -219,6 +226,11 @@ private:
 
 	int textDisplayOffset_;
 
+	// Added by David Cristofaro
+	Mat swtmap1_;
+	Mat swtmap2_;
+	Mat ccmap1_;
+	Mat ccmap2_;
 };
 
 #endif

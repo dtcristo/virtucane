@@ -78,6 +78,8 @@ void DetectText::detect() {
 	overlapBoundingBoxes(boundingBoxes_);
 	ocrRead(boundingBoxes_);
 	showBoundingBoxes(boxesBothSides_);
+	// Added by David Cristofaro
+	showMeanStrokeWidth(boxesBothSides_);
 	overlayText(boxesBothSides_, wordsBothSides_);
 
 	imwrite(outputPrefix_ + "_detection.jpg", detection_);
@@ -167,12 +169,19 @@ void DetectText::pipeline(int blackWhite) {
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
 	cout << time_in_seconds << "s in chainPairs" << endl;
 
-	/*
-	 showEdgeMap();
-	 showSwtmap(swtmap);
-	 showCcmap(ccmap);
-	 showLetterGroup();
-	 */
+	//showEdgeMap();
+	//showSwtmap(swtmap);
+	//showCcmap(ccmap);
+	//showLetterGroup();
+
+	if (firstPass_) {
+		swtmap1_ = swtmap.clone();
+		ccmap1_ = ccmap.clone();
+
+	} else {
+		swtmap2_ = swtmap.clone();
+		ccmap2_ = ccmap.clone();
+	}
 
 	disposal();
 	cout << "finish clean up" << endl;
@@ -1151,6 +1160,50 @@ void DetectText::showBoundingBoxes(vector<Rect>& boundingBoxes,
 				Point(rect->x + rect->width, rect->y + rect->height), scalar,
 				3);
 	}
+}
+
+// Added by David Cristofaro
+void DetectText::showMeanStrokeWidth(vector<Rect>& boxes) {
+	Scalar color1, color2;
+	color1 = Scalar(255, 255, 255);
+	color2 = Scalar(0, 0, 0);
+
+	for (size_t i = 0; i < boxes.size(); i++) {
+
+		float sw1 = getMeanStrokeWidth(ccmap1_, swtmap1_, boxes[i]);
+		float sw2 = getMeanStrokeWidth(ccmap2_, swtmap2_, boxes[i]);
+		//float minSw = min(sw1, sw2);
+
+		stringstream ss1, ss2;
+		ss1 << sw1;
+		ss2 << sw2;
+
+		putText(detection_, ss1.str(), Point(boxes[i].x, boxes[i].y),
+				FONT_HERSHEY_DUPLEX, 1, color1, 2);
+		putText(detection_, ss2.str(), Point(boxes[i].x, boxes[i].y - 30),
+				FONT_HERSHEY_DUPLEX, 1, color2, 2);
+	}
+}
+
+// Added by David Cristofaro
+float DetectText::getMeanStrokeWidth(const Mat& ccmap, const Mat& swtmap,
+		const Rect& rect) {
+
+	float swtSum = 0;
+	int count = 0;
+
+	for (int y = rect.y; y < rect.y + rect.height; y++)
+		for (int x = rect.x; x < rect.x + rect.width; x++) {
+			if (ccmap.at<float>(y, x) != -1) {
+				swtSum += swtmap.at<float>(y, x);
+				count++;
+			}
+		}
+
+	if (count == 0)
+		return 0;
+
+	return (swtSum / count);
 }
 
 inline int DetectText::countInnerLetterCandidates(bool* array) {
