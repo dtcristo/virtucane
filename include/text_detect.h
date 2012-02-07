@@ -171,7 +171,8 @@ private:
 	void showMeanStrokeWidth(vector<Rect>& boxes);
 
 	// Added by David Cristofaro
-	float getMeanStrokeWidth(const Mat& ccmap, const Mat& swtmap, const Rect& rect);
+	float getMeanStrokeWidth(const Mat& ccmap, const Mat& swtmap,
+			const Rect& rect);
 
 	// tests
 	void testEdgePoints(vector<Point> &edgepoints);

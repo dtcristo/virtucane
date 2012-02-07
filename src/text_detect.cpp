@@ -5,10 +5,10 @@
  *
  */
 
-/** \author Menglong Zhu */
+/* Author: Menglong Zhu
+ * Modified by: David Cristofaro, 2012 */
 
-#include <read_text/text_detect.h>
-#include <ros/ros.h>
+#include <text_detect.h>
 
 #include <iostream>
 #include <fstream>
@@ -31,7 +31,7 @@ void DetectText::detect(string filename) {
 	filename_ = filename;
 	originalImage_ = imread(filename_);
 	if (!originalImage_.data) {
-		ROS_ERROR("Cannot read image input...");
+		cout << "Cannot read image input..." << endl;
 		return;
 	}
 	mode_ = IMAGE;
@@ -79,7 +79,7 @@ void DetectText::detect() {
 	ocrRead(boundingBoxes_);
 	showBoundingBoxes(boxesBothSides_);
 	// Added by David Cristofaro
-	showMeanStrokeWidth(boxesBothSides_);
+	//showMeanStrokeWidth(boxesBothSides_);
 	overlayText(boxesBothSides_, wordsBothSides_);
 
 	imwrite(outputPrefix_ + "_detection.jpg", detection_);
