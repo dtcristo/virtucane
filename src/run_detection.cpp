@@ -4,7 +4,7 @@
 int main(int argc, char* argv[]) {
 	if (argc < 4) {
 		cout
-				<< "not enough input: detect_text <image> <correlation> <dictionary>"
+				<< "Not enough input: detect_text <image> <correlation> <dictionary>"
 				<< endl;
 		return -1;
 	}

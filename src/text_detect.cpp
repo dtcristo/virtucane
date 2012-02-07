@@ -28,6 +28,9 @@ DetectText::~DetectText() {
 
 /* API for detect text from image */
 void DetectText::detect(string filename) {
+	// Added by David Cristofaro
+	patchCount_ = 1;
+
 	filename_ = filename;
 	originalImage_ = imread(filename_);
 	if (!originalImage_.data) {
@@ -785,26 +788,42 @@ void DetectText::ocrRead(vector<Rect>& boundingBoxes) {
 float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	float score = 0;
 	Mat scaledImage;
+	stringstream ss;
+
+	string patchName, patchNameTiff;
+	ss.str("");
+	ss << outputPrefix_ << "_patch_" << patchCount_;
+	patchName = ss.str();
+	ss << ".tiff";
+	patchNameTiff = ss.str();
+
 	if (imagePatch.rows < 30) {
 		double scale = 1.5;
 		resize(imagePatch, scaledImage, Size(0, 0), scale, scale,
 				INTER_LANCZOS4);
-
-		imwrite("patch.tiff", scaledImage);
+		imwrite(patchNameTiff, scaledImage);
 	} else {
-		imwrite("patch.tiff", imagePatch);
+		imwrite(patchNameTiff, imagePatch);
 	}
 	int result;
-	result = system("$(rospack find tesseract)/bin/tesseract patch.tiff patch");
+
+	ss.str("");
+	ss << "tesseract " << patchNameTiff << " " << patchName;
+	result = system(ss.str().c_str());
 	assert(!result);
-	ifstream fin("patch.txt");
+
+	ss.str("");
+	ss << patchName << ".txt";
+	ifstream fin(ss.str().c_str());
 	string str;
 	while (fin >> str) {
 		string tempOutput;
 		score += spellCheck(str, tempOutput, 2);
 		output += tempOutput;
 	}
-	result = system("$(rm patch.txt patch.tiff)");
+
+	// result = system("$(rm patch.txt patch.tiff)");
+	patchCount_++;
 	return score;
 }
 

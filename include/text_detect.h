@@ -232,6 +232,8 @@ private:
 	Mat swtmap2_;
 	Mat ccmap1_;
 	Mat ccmap2_;
+
+	int patchCount_;
 };
 
 #endif
