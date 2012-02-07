@@ -1,9 +1,6 @@
 .cproject
 .project
-.pydevproject
-cmake_install.cmake
+Debug/
 build/
 bin/
 lib/
-msg_gen/
-srv_gen/

@@ -1,8 +1,7 @@
-#ifndef _LITERATE_PR2_TEXT_DETECT_
-#define _LITERATE_PR2_TEXT_DETECT_
+#ifndef _DETECT_TEXT_
+#define _DETECT_TEXT_
 
-#include "opencv/cv.h"
-#include "opencv/highgui.h"
+#include "opencv2/opencv.hpp"
 
 using namespace cv;
 using namespace std;
@@ -85,7 +84,7 @@ private:
 	void strokeWidthTransform(const Mat &image, Mat &swtmap,
 			int searchDirection);
 
-	/* for each edge point, search along gradient 
+	/* for each edge point, search along gradient
 	 * direction compute stroke width
 	 * searchDirection: 1 for along gradient, -1 for opposite
 	 * purpose: 1 for compute, 2 for refine
@@ -187,7 +186,7 @@ private:
 	float initialStrokeWidth_;
 	Mat edgemap_;
 	Mat theta_;
-	bool firstPass_; //  white: 1, black : 0 
+	bool firstPass_; //  white: 1, black : 0
 	vector<Point> edgepoints_;
 
 	Mat correlation_; // read from arg[1]

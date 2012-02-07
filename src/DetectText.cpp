@@ -1,18 +1,18 @@
 /**
- * Implementation based on "Detecting Text in Natural Scenes with  
+ * Implementation based on "Detecting Text in Natural Scenes with
  * Stroke Width Transform", Boris Epshtein, Eyal Ofek, Yonatan Wexler
  * CVPR 2010
  *
  */
 
 /* Author: Menglong Zhu
- * Modified by: David Cristofaro, 2012 */
-
-#include <text_detect.h>
+ * Modified by: David Cristofaro*/
 
 #include <iostream>
 #include <fstream>
 #include <stack>
+
+#include "DetectText.h"
 
 using namespace cv;
 using namespace std;
@@ -827,7 +827,7 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	return score;
 }
 
-// two option: 1 for aspell, 2 for correlation edit distance 
+// two option: 1 for aspell, 2 for correlation edit distance
 // return the score for the input
 float DetectText::spellCheck(string& str, string& output, int method) {
 	int letterCount = 0, errorCount = 0, lNoiseCount = 0, digitCount = 0;
@@ -911,7 +911,7 @@ float DetectText::spellCheck(string& str, string& output, int method) {
 			r = system("rm output");
 		}
 
-		// dictionary search 
+		// dictionary search
 		if (method == 2) {
 			vector<Word> topk;
 			string nearestWord;
@@ -1007,10 +1007,10 @@ string&
 DetectText::trim(string& str) {
 	// Trim Both leading and trailing spaces
 
-	// Find the first character position after 
+	// Find the first character position after
 	// excluding leading blank spaces
 	size_t startpos = str.find_first_not_of(" \t");
-	// Find the first character position from reverse af 
+	// Find the first character position from reverse af
 	size_t endpos = str.find_last_not_of(" \t");
 	// if all spaces or empty return an empty string
 	if ((string::npos == startpos) || (string::npos == endpos))
@@ -1315,7 +1315,7 @@ bool DetectText::mergePairs(const vector<vector<int> >& initialChains,
 			// match elements in chain i,j
 			for (size_t ki = 0; ki < initialChains[i].size(); ki++) {
 				for (size_t kj = 0; kj < initialChains[j].size(); kj++) {
-					// found match				
+					// found match
 					if (initialChains[i][ki] == initialChains[j][kj]) {
 						merged = true;
 						// j already merged with others
