@@ -746,8 +746,8 @@ void DetectText::overlayText(vector<Rect>& box, vector<string>& text) {
 		if (count > 9)
 			indent = 70;
 		string output = text[i];
-		if (output.compare("") == 0)
-			continue;
+		//if (output.compare("") == 0)
+		//	continue;
 		std::string s;
 		std::stringstream out;
 		out << count;
@@ -777,13 +777,13 @@ void DetectText::ocrRead(vector<Rect>& boundingBoxes) {
 	sort(boundingBoxes.begin(), boundingBoxes.end(), DetectText::spaticalOrder);
 	for (size_t i = 0; i < boundingBoxes.size(); i++) {
 		string result;
-		if (score > 0) {
-			boxesBothSides_.push_back(boundingBoxes[i]);
-			wordsBothSides_.push_back(result);
-			boxesScores_.push_back(score);
-		}
 		//float score = ocrRead(originalImage_(boundingBoxes[i]), result);
 		float score = ocrRead(image_(boundingBoxes[i]), result);
+		//if (score > 0) {
+		boxesBothSides_.push_back(boundingBoxes[i]);
+		wordsBothSides_.push_back(result);
+		boxesScores_.push_back(score);
+		//}
 	}
 }
 
@@ -823,8 +823,8 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	ifstream fin(ss.str().c_str());
 	string str;
 	while (fin >> str) {
-		string tempOutput;
-		score += spellCheck(str, tempOutput, 2);
+		string tempOutput = str + " ";
+		//score += spellCheck(str, tempOutput, 2);
 		output += tempOutput;
 	}
 
