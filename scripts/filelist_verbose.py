@@ -9,7 +9,7 @@ def filelist(thepath):
 	dirlist = os.listdir(thepath)
 	executeBin = "~/Dropbox/Workspace/read_text/Debug/read_text "
 	correlation = " ~/Dropbox/Workspace/read_text/correlation.txt"
-	dictionary = " ~/Dropbox/Workspace/read_text/full-dictionary"
+	dictionary = " ~/Dropbox/Workspace/read_text/full-dictionary -v"
 	print "current directory:" + thepath
 	for name in dirlist:
 		absolutePath = os.path.join(thepath,name)

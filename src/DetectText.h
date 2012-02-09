@@ -12,7 +12,7 @@ public:
 	~DetectText();
 
 	/* API */
-	void detect(string filename);
+	void detect(string filename, bool v);
 	void detect(Mat& image);
 
 	/* read useful files  */
@@ -233,6 +233,8 @@ private:
 	Mat ccmap2_;
 
 	int patchCount_;
+
+	bool verbose_;
 };
 
 #endif

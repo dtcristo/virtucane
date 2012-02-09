@@ -27,9 +27,10 @@ DetectText::~DetectText() {
 }
 
 /* API for detect text from image */
-void DetectText::detect(string filename) {
+void DetectText::detect(string filename, bool v) {
 	// Added by David Cristofaro
 	patchCount_ = 1;
+	verbose_ = v;
 
 	filename_ = filename;
 	originalImage_ = imread(filename_);
@@ -822,7 +823,11 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 		output += tempOutput;
 	}
 
-	// result = system("$(rm patch.txt patch.tiff)");
+	if (!verbose_) {
+		ss.str("");
+		ss << "$(rm " << patchNameTiff << " " << patchName << ".txt)";
+		result = system(ss.str().c_str());
+	}
 	patchCount_++;
 	return score;
 }
