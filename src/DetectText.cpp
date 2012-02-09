@@ -777,18 +777,19 @@ void DetectText::ocrRead(vector<Rect>& boundingBoxes) {
 	sort(boundingBoxes.begin(), boundingBoxes.end(), DetectText::spaticalOrder);
 	for (size_t i = 0; i < boundingBoxes.size(); i++) {
 		string result;
-		float score = ocrRead(originalImage_(boundingBoxes[i]), result);
 		if (score > 0) {
 			boxesBothSides_.push_back(boundingBoxes[i]);
 			wordsBothSides_.push_back(result);
 			boxesScores_.push_back(score);
 		}
+		//float score = ocrRead(originalImage_(boundingBoxes[i]), result);
+		float score = ocrRead(image_(boundingBoxes[i]), result);
 	}
 }
 
 float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	float score = 0;
-	Mat scaledImage;
+	Mat binaryPatch, scaledPatch;
 	stringstream ss;
 
 	string patchName, patchNameTiff;
@@ -798,13 +799,17 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	ss << ".tiff";
 	patchNameTiff = ss.str();
 
-	if (imagePatch.rows < 30) {
+	//Trresholding
+	//threshold(imagePatch, binaryPatch, 10, 255, THRESH_OTSU);
+	binaryPatch = imagePatch;
+
+	if (binaryPatch.rows < 30) {
 		double scale = 1.5;
-		resize(imagePatch, scaledImage, Size(0, 0), scale, scale,
+		resize(binaryPatch, scaledPatch, Size(0, 0), scale, scale,
 				INTER_LANCZOS4);
-		imwrite(patchNameTiff, scaledImage);
+		imwrite(patchNameTiff, scaledPatch);
 	} else {
-		imwrite(patchNameTiff, imagePatch);
+		imwrite(patchNameTiff, binaryPatch);
 	}
 	int result;
 
