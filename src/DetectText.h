@@ -1,7 +1,13 @@
 #ifndef _DETECT_TEXT_
 #define _DETECT_TEXT_
 
-#include "opencv2/opencv.hpp"
+#include <iostream>
+#include <fstream>
+#include <stack>
+
+#include <opencv2/opencv.hpp>
+
+#include "read_text.h"
 
 using namespace cv;
 using namespace std;
@@ -12,7 +18,7 @@ public:
 	~DetectText();
 
 	/* API */
-	void detect(string filename, bool v);
+	void detect(string filename);
 	void detect(Mat& image);
 
 	/* read useful files  */
@@ -111,7 +117,9 @@ private:
 
 	void ocrRead(vector<Rect>& boundingBoxes);
 
-	float ocrRead(const Mat& imagePatch, string& output);
+	void ocrRead(const Mat& imagePatch, string& output);
+
+	float scoreString(string& str);
 
 	float spellCheck(string& str, string& output, int method);
 
@@ -233,8 +241,6 @@ private:
 	Mat ccmap2_;
 
 	int patchCount_;
-
-	bool verbose_;
 };
 
 #endif

@@ -1,17 +1,3 @@
-/**
- * Implementation based on "Detecting Text in Natural Scenes with
- * Stroke Width Transform", Boris Epshtein, Eyal Ofek, Yonatan Wexler
- * CVPR 2010
- *
- */
-
-/* Author: Menglong Zhu
- * Modified by: David Cristofaro*/
-
-#include <iostream>
-#include <fstream>
-#include <stack>
-
 #include "DetectText.h"
 
 using namespace cv;
@@ -27,10 +13,9 @@ DetectText::~DetectText() {
 }
 
 /* API for detect text from image */
-void DetectText::detect(string filename, bool v) {
+void DetectText::detect(string filename) {
 	// Added by David Cristofaro
 	patchCount_ = 1;
-	verbose_ = v;
 
 	filename_ = filename;
 	originalImage_ = imread(filename_);
@@ -746,8 +731,6 @@ void DetectText::overlayText(vector<Rect>& box, vector<string>& text) {
 		if (count > 9)
 			indent = 70;
 		string output = text[i];
-		//if (output.compare("") == 0)
-		//	continue;
 		std::string s;
 		std::stringstream out;
 		out << count;
@@ -777,18 +760,26 @@ void DetectText::ocrRead(vector<Rect>& boundingBoxes) {
 	sort(boundingBoxes.begin(), boundingBoxes.end(), DetectText::spaticalOrder);
 	for (size_t i = 0; i < boundingBoxes.size(); i++) {
 		string result;
-		//float score = ocrRead(originalImage_(boundingBoxes[i]), result);
-		float score = ocrRead(image_(boundingBoxes[i]), result);
-		//if (score > 0) {
-		boxesBothSides_.push_back(boundingBoxes[i]);
-		wordsBothSides_.push_back(result);
-		boxesScores_.push_back(score);
-		//}
+
+
+		if (imageMode_ == IMAGE_MODE_RGB){
+			ocrRead(originalImage_(boundingBoxes[i]), result);
+		}
+		else {
+			ocrRead(image_(boundingBoxes[i]), result);
+		}
+
+		float score = scoreString(result);
+
+		if ((score > 0) || !scoring_) {
+			boxesBothSides_.push_back(boundingBoxes[i]);
+			wordsBothSides_.push_back(result);
+			boxesScores_.push_back(score);
+		}
 	}
 }
 
-float DetectText::ocrRead(const Mat& imagePatch, string& output) {
-	float score = 0;
+void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	Mat binaryPatch, scaledPatch;
 	stringstream ss;
 
@@ -799,9 +790,10 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	ss << ".tiff";
 	patchNameTiff = ss.str();
 
-	//Trresholding
-	//threshold(imagePatch, binaryPatch, 10, 255, THRESH_OTSU);
-	binaryPatch = imagePatch;
+	if (imageMode_ == IMAGE_MODE_BINARY){
+		threshold(imagePatch, binaryPatch, 10, 255, THRESH_OTSU);
+	}
+	else binaryPatch = imagePatch;
 
 	if (binaryPatch.rows < 30) {
 		double scale = 1.5;
@@ -823,9 +815,9 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	ifstream fin(ss.str().c_str());
 	string str;
 	while (fin >> str) {
-		string tempOutput = str + " ";
+		//string tempOutput = str + " ";
 		//score += spellCheck(str, tempOutput, 2);
-		output += tempOutput;
+		output += str + " ";
 	}
 
 	if (!verbose_) {
@@ -834,6 +826,11 @@ float DetectText::ocrRead(const Mat& imagePatch, string& output) {
 		result = system(ss.str().c_str());
 	}
 	patchCount_++;
+}
+
+// Score starts at 1. Set to 0 for a bad string. Higher number is better quality string.
+float DetectText::scoreString(string& str) {
+	float score = 1;
 	return score;
 }
 
