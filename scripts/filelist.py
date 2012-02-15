@@ -7,16 +7,14 @@ def filelist(thepath):
 	'''		this python script read images from a directory, 
 				add perform text detection	'''
 	dirlist = os.listdir(thepath)
-	executeBin = "~/Dropbox/Workspace/read_text/Debug/read_text "
-	correlation = " ~/Dropbox/Workspace/read_text/correlation.txt"
-	dictionary = " ~/Dropbox/Workspace/read_text/full-dictionary"
+	executeBin = "~/Dropbox/Workspace/read_text/Debug/read_text -f "
 	print "current directory:" + thepath
 	for name in dirlist:
 		absolutePath = os.path.join(thepath,name)
 		if not  os.path.isdir(absolutePath):
 			print name
 			if name.endswith(".jpg") or name.endswith(".png") or name.endswith(".JPG"):
-				execute = executeBin + absolutePath + correlation + dictionary
+				execute = executeBin + absolutePath
 				os.system(execute)
 		else:
 			filelist(absolutePath)
