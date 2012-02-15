@@ -14,9 +14,7 @@ DetectText::~DetectText() {
 
 /* API for detect text from image */
 void DetectText::detect(string filename) {
-	// Added by David Cristofaro
 	patchCount_ = 0;
-
 	filename_ = filename;
 	originalImage_ = imread(filename_);
 	if (!originalImage_.data) {
@@ -28,6 +26,7 @@ void DetectText::detect(string filename) {
 }
 
 void DetectText::detect(Mat& image) {
+	patchCount_ = 0;
 	filename_ = string("streaming.jpg");
 	originalImage_ = image;
 	mode_ = STREAM;
@@ -69,7 +68,6 @@ void DetectText::detect() {
 	overlapBoundingBoxes(boundingBoxes_);
 	ocrRead(boundingBoxes_);
 	showBoundingBoxes(boxesBothSides_);
-	// Added by David Cristofaro
 	//showMeanStrokeWidth(boxesBothSides_);
 	overlayText(boxesBothSides_, wordsBothSides_);
 
@@ -169,14 +167,16 @@ void DetectText::pipeline(int blackWhite) {
 	//showCcmap(ccmap);
 	//showLetterGroup();
 
-	if (firstPass_) {
-		swtmap1_ = swtmap.clone();
-		ccmap1_ = ccmap.clone();
-
-	} else {
-		swtmap2_ = swtmap.clone();
-		ccmap2_ = ccmap.clone();
 	}
+
+//	if (firstPass_) {
+//		swtmap1_ = swtmap.clone();
+//		ccmap1_ = ccmap.clone();
+//
+//	} else {
+//		swtmap2_ = swtmap.clone();
+//		ccmap2_ = ccmap.clone();
+//	}
 
 	disposal();
 	if (verbose_) cout << "Finished pass" << endl;
@@ -1247,49 +1247,47 @@ void DetectText::showBoundingBoxes(vector<Rect>& boundingBoxes,
 	}
 }
 
-// Added by David Cristofaro
-void DetectText::showMeanStrokeWidth(vector<Rect>& boxes) {
-	Scalar color1, color2;
-	color1 = Scalar(255, 255, 255);
-	color2 = Scalar(0, 0, 0);
-
-	for (size_t i = 0; i < boxes.size(); i++) {
-
-		float sw1 = getMeanStrokeWidth(ccmap1_, swtmap1_, boxes[i]);
-		float sw2 = getMeanStrokeWidth(ccmap2_, swtmap2_, boxes[i]);
-		//float minSw = min(sw1, sw2);
-
-		stringstream ss1, ss2;
-		ss1 << sw1;
-		ss2 << sw2;
-
-		putText(detection_, ss1.str(), Point(boxes[i].x, boxes[i].y),
-				FONT_HERSHEY_DUPLEX, 1, color1, 2);
-		putText(detection_, ss2.str(), Point(boxes[i].x, boxes[i].y - 30),
-				FONT_HERSHEY_DUPLEX, 1, color2, 2);
-	}
-}
-
-// Added by David Cristofaro
-float DetectText::getMeanStrokeWidth(const Mat& ccmap, const Mat& swtmap,
-		const Rect& rect) {
-
-	float swtSum = 0;
-	int count = 0;
-
-	for (int y = rect.y; y < rect.y + rect.height; y++)
-		for (int x = rect.x; x < rect.x + rect.width; x++) {
-			if (ccmap.at<float>(y, x) != -1) {
-				swtSum += swtmap.at<float>(y, x);
-				count++;
-			}
-		}
-
-	if (count == 0)
-		return 0;
-
-	return (swtSum / count);
-}
+//void DetectText::showMeanStrokeWidth(vector<Rect>& boxes) {
+//	Scalar color1, color2;
+//	color1 = Scalar(255, 255, 255);
+//	color2 = Scalar(0, 0, 0);
+//
+//	for (size_t i = 0; i < boxes.size(); i++) {
+//
+//		float sw1 = getMeanStrokeWidth(ccmap1_, swtmap1_, boxes[i]);
+//		float sw2 = getMeanStrokeWidth(ccmap2_, swtmap2_, boxes[i]);
+//		//float minSw = min(sw1, sw2);
+//
+//		stringstream ss1, ss2;
+//		ss1 << sw1;
+//		ss2 << sw2;
+//
+//		putText(detection_, ss1.str(), Point(boxes[i].x, boxes[i].y),
+//				FONT_HERSHEY_DUPLEX, 1, color1, 2);
+//		putText(detection_, ss2.str(), Point(boxes[i].x, boxes[i].y - 30),
+//				FONT_HERSHEY_DUPLEX, 1, color2, 2);
+//	}
+//}
+//
+//float DetectText::getMeanStrokeWidth(const Mat& ccmap, const Mat& swtmap,
+//		const Rect& rect) {
+//
+//	float swtSum = 0;
+//	int count = 0;
+//
+//	for (int y = rect.y; y < rect.y + rect.height; y++)
+//		for (int x = rect.x; x < rect.x + rect.width; x++) {
+//			if (ccmap.at<float>(y, x) != -1) {
+//				swtSum += swtmap.at<float>(y, x);
+//				count++;
+//			}
+//		}
+//
+//	if (count == 0)
+//		return 0;
+//
+//	return (swtSum / count);
+//}
 
 inline int DetectText::countInnerLetterCandidates(bool* array) {
 	int count = 0;
