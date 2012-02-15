@@ -121,6 +121,10 @@ private:
 
 	float scoreString(string& str);
 
+	bool isLetter(char c);
+
+	bool isNumber(char c);
+
 	float spellCheck(string& str, string& output, int method);
 
 	Mat filterPatch(const Mat& patch);

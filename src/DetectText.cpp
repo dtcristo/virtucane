@@ -15,7 +15,7 @@ DetectText::~DetectText() {
 /* API for detect text from image */
 void DetectText::detect(string filename) {
 	// Added by David Cristofaro
-	patchCount_ = 1;
+	patchCount_ = 0;
 
 	filename_ = filename;
 	originalImage_ = imread(filename_);
@@ -60,8 +60,10 @@ void DetectText::detect() {
 
 	preprocess(imGray);
 	firstPass_ = true;
+	if (verbose_) cout << endl << "First pass:" << endl;
 	pipeline(1);
 	firstPass_ = false;
+	if (verbose_) cout << endl << "Second pass:" << endl;
 	pipeline(-1);
 
 	overlapBoundingBoxes(boundingBoxes_);
@@ -73,16 +75,20 @@ void DetectText::detect() {
 
 	imwrite(outputPrefix_ + "_detection.jpg", detection_);
 
-	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
-	cout << time_in_seconds << "s total in process\n" << endl;
+	if (verbose_) {
+		time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
+		cout << endl << time_in_seconds << "s total process time\n" << endl;
+	}
 
 	textDisplayOffset_ = 1;
 }
 
 /* rescale, convert into gray scale */
 void DetectText::preprocess(Mat& image) {
-	cout << "preprocessing: " << filename_ << endl;
-	cout << "image size:" << image.cols << "X" << image.rows << endl;
+	if (verbose_) {
+		cout << "Preprocessing: " << filename_ << endl;
+		cout << "Image size: " << image.cols << "x" << image.rows << endl;
+	}
 
 	int slashIndex = -1;
 	int dotIndex = -1;
@@ -93,7 +99,7 @@ void DetectText::preprocess(Mat& image) {
 			slashIndex = i;
 	}
 	outputPrefix_ = filename_.substr(slashIndex + 1, dotIndex - slashIndex - 1);
-	cout << "outputPrefix: " << outputPrefix_ << endl;
+	if (verbose_) cout << "outputPrefix_ = " << outputPrefix_ << endl;
 
 	image_ = image;
 //	bilateralFilter(image, image_, 7, 20, 50);// prosilica sensor noise
@@ -134,29 +140,29 @@ void DetectText::pipeline(int blackWhite) {
 	Mat swtmap(image_.size(), CV_32FC1, Scalar(initialStrokeWidth_));
 	strokeWidthTransform(image_, swtmap, blackWhite);
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
-	cout << time_in_seconds << "s in strokeWidthTransform" << endl;
+	if (verbose_) cout << time_in_seconds << "s in strokeWidthTransform" << endl;
 
 	start_time = clock();
 	Mat ccmap(image_.size(), CV_32FC1, Scalar(-1));
 	componentsRoi_.clear();
 	nComponent_ = connectComponentAnalysis(swtmap, ccmap);
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
-	cout << time_in_seconds << "s in connectComponentAnalysis" << endl;
+	if (verbose_) cout << time_in_seconds << "s in connectComponentAnalysis" << endl;
 
 	start_time = clock();
 	identifyLetters(swtmap, ccmap);
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
-	cout << time_in_seconds << "s in identifyLetters" << endl;
+	if (verbose_) cout << time_in_seconds << "s in identifyLetters" << endl;
 
 	start_time = clock();
 	groupLetters(swtmap, ccmap);
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
-	cout << time_in_seconds << "s in groupLetters" << endl;
+	if (verbose_) cout << time_in_seconds << "s in groupLetters" << endl;
 
 	start_time = clock();
 	chainPairs(ccmap);
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
-	cout << time_in_seconds << "s in chainPairs" << endl;
+	if (verbose_) cout << time_in_seconds << "s in chainPairs" << endl;
 
 	//showEdgeMap();
 	//showSwtmap(swtmap);
@@ -173,8 +179,7 @@ void DetectText::pipeline(int blackWhite) {
 	}
 
 	disposal();
-	cout << "finish clean up" << endl;
-
+	if (verbose_) cout << "Finished pass" << endl;
 }
 
 void DetectText::strokeWidthTransform(const Mat& image, Mat& swtmap,
@@ -207,12 +212,9 @@ void DetectText::strokeWidthTransform(const Mat& image, Mat& swtmap,
 	}
 
 	vector<Point> strokePoints;
-	updateStrokeWidth(swtmap, edgepoints_, strokePoints, searchDirection,
-			UPDATE);
+	updateStrokeWidth(swtmap, edgepoints_, strokePoints, searchDirection, UPDATE);
 
-	updateStrokeWidth(swtmap, strokePoints, strokePoints, searchDirection,
-			REFINE);
-
+	updateStrokeWidth(swtmap, strokePoints, strokePoints, searchDirection, REFINE);
 }
 
 void DetectText::updateStrokeWidth(Mat& swtmap, vector<Point>& startPoints,
@@ -402,7 +404,9 @@ void DetectText::identifyLetters(const Mat& swtmap, const Mat& ccmap) {
 	assert(static_cast<size_t>(nComponent_) == componentsRoi_.size());
 	isLetterComponects_ = new bool[nComponent_];
 	vector<float> iComponentStrokeWidth;
-	cout << nComponent_ << "componets" << endl;
+
+	if (verbose_) cout << nComponent_ << " componets" << endl;
+
 	bool *innerComponents = new bool[nComponent_];
 	for (size_t i = 0; i < nComponent_; i++) {
 		float maxStrokeWidth = 0;
@@ -805,8 +809,12 @@ void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	}
 	int result;
 
+	if (verbose_) cout << endl << "Processing patch_" << patchCount_ << ":" << endl;
+
 	ss.str("");
 	ss << "tesseract " << patchNameTiff << " " << patchName;
+	// Suppress Tesseract output.
+	if (!verbose_) ss << " > /dev/null 2>&1";
 	result = system(ss.str().c_str());
 	assert(!result);
 
@@ -820,6 +828,9 @@ void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 		output += str + " ";
 	}
 
+	// Trim leading and trailing whitespace.
+	output = trim(output);
+
 	if (!verbose_) {
 		ss.str("");
 		ss << "$(rm " << patchNameTiff << " " << patchName << ".txt)";
@@ -831,7 +842,55 @@ void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 // Score starts at 1. Set to 0 for a bad string. Higher number is better quality string.
 float DetectText::scoreString(string& str) {
 	float score = 1;
+
+	// Blank strings are bad.
+	if (str.compare("") == 0) {
+		return 0;
+	}
+
+	int charCount = 0;
+	int letterCount = 0;
+	int numberCount = 0;
+	int spaceCount = 0;
+	int symbolCount = 0;
+
+	for (size_t i = 0; i < str.length(); i++) {
+		charCount++;
+		if (isLetter(str[i])) letterCount++;
+		else if (isNumber(str[i])) numberCount++;
+		else if (str[i] == ' ') spaceCount++;
+		else symbolCount++;
+	}
+
+	float symbolRatio = (float) symbolCount / charCount;
+
+	if (verbose_) {
+		cout << "letterCount = " << letterCount << endl;
+		cout << "numberCount = " << numberCount << endl;
+		cout << "spaceCount = " << spaceCount << endl;
+		cout << "symbolCount = " << symbolCount << endl;
+		cout << "symbolRatio = " << symbolRatio << endl;
+	}
+
+	if (symbolRatio > 0.25) {
+		return 0;
+	}
+
 	return score;
+}
+
+bool DetectText::isLetter(char c) {
+	if (((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z'))) {
+		return true;
+	}
+	else return false;
+}
+
+bool DetectText::isNumber(char c) {
+	if ((c >= '0') && (c <= '9')) {
+		return true;
+	}
+	else return false;
 }
 
 // two option: 1 for aspell, 2 for correlation edit distance
