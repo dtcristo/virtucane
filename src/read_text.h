@@ -19,5 +19,6 @@ extern int imageMode_;
 extern bool verbose_;
 extern bool scoring_;
 extern bool speak_;
+extern int speakMax_;
 
 #endif
