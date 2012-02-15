@@ -34,15 +34,14 @@ void DetectText::detect(Mat& image) {
 }
 
 /* getters */
-Mat&
-DetectText::getDetection() {
+Mat& DetectText::getDetection() {
 	return detection_;
 }
 
-vector<string>&
-DetectText::getWords() {
+vector<string>& DetectText::getWords() {
 	return wordsBothSides_;
 }
+
 /* internal process */
 void DetectText::detect() {
 	double start_time;
@@ -77,6 +76,8 @@ void DetectText::detect() {
 		time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
 		cout << endl << time_in_seconds << "s total process time\n" << endl;
 	}
+
+	if (speak_) speakResults(wordsBothSides_, boxesScores_, 0);
 
 	textDisplayOffset_ = 1;
 }
@@ -127,7 +128,7 @@ void DetectText::pipeline(int blackWhite) {
 	} else if (blackWhite == -1) {
 		fontColor_ = DARK;
 	} else {
-		cout << "blackwhite should only be +/-1" << endl;
+		cerr << "blackWhite should only be +/-1" << endl;
 		assert(false);
 	}
 	// initialize swtmap with large values
@@ -162,11 +163,11 @@ void DetectText::pipeline(int blackWhite) {
 	time_in_seconds = (clock() - start_time) / (double) CLOCKS_PER_SEC;
 	if (verbose_) cout << time_in_seconds << "s in chainPairs" << endl;
 
-	//showEdgeMap();
-	//showSwtmap(swtmap);
-	//showCcmap(ccmap);
-	//showLetterGroup();
-
+	if (verbose_) {
+		showEdgeMap();
+		showSwtmap(swtmap);
+		showCcmap(ccmap);
+		showLetterGroup();
 	}
 
 //	if (firstPass_) {
@@ -807,7 +808,6 @@ void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	} else {
 		imwrite(patchNameTiff, binaryPatch);
 	}
-	int result;
 
 	if (verbose_) cout << endl << "Processing patch_" << patchCount_ << ":" << endl;
 
@@ -815,7 +815,7 @@ void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 	ss << "tesseract " << patchNameTiff << " " << patchName;
 	// Suppress Tesseract output.
 	if (!verbose_) ss << " > /dev/null 2>&1";
-	result = system(ss.str().c_str());
+	int result = system(ss.str().c_str());
 	assert(!result);
 
 	ss.str("");
@@ -835,6 +835,7 @@ void DetectText::ocrRead(const Mat& imagePatch, string& output) {
 		ss.str("");
 		ss << "$(rm " << patchNameTiff << " " << patchName << ".txt)";
 		result = system(ss.str().c_str());
+		assert(!result);
 	}
 	patchCount_++;
 }
@@ -870,6 +871,10 @@ float DetectText::scoreString(string& str) {
 		cout << "spaceCount = " << spaceCount << endl;
 		cout << "symbolCount = " << symbolCount << endl;
 		cout << "symbolRatio = " << symbolRatio << endl;
+	}
+
+	if ((letterCount == 1) && (symbolCount == 1)) {
+		return 0;
 	}
 
 	if (symbolRatio > 0.25) {
@@ -1024,6 +1029,26 @@ float DetectText::spellCheck(string& str, string& output, int method) {
 	return score;
 }
 
+// Speaks the OCR results.
+// TODO: Speak in order of score.
+// If max=0, speak all. Otherwise speak a maximum of "max" phrases.
+void DetectText::speakResults(vector<string>& text, vector<float>& scores, int max=0) {
+	assert(text.size() == scores.size());
+	stringstream ss;
+
+	for (size_t i = 0; i < text.size(); i++) {
+		if ((max == 0) || ((int) i < max)) {
+			// Sleep for 0.5 seconds between phrases.
+			if ((int) i != 0) usleep(500 * 1000);
+			ss.str("");
+			ss << "say \"" << text[i] << "\"";
+			int result = system(ss.str().c_str());
+			assert(!result);
+		}
+		else break;
+	}
+}
+
 Mat DetectText::filterPatch(const Mat& patch) {
 	Mat result;
 	Mat element = getStructuringElement(MORPH_ELLIPSE,
@@ -1069,8 +1094,7 @@ void DetectText::readWordList(const char* filename) {
 			<< endl;
 }
 
-string&
-DetectText::trim(string& str) {
+string& DetectText::trim(string& str) {
 	// Trim Both leading and trailing spaces
 
 	// Find the first character position after
