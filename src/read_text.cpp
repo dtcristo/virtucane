@@ -9,7 +9,7 @@ bool scoring_ = false;
 bool speak_ = false;
 int speakMax_ = 0;
 
-int main(int ac, char* av[]) {
+int main(int argc, char* argv[]) {
 
 	try {
 		po::options_description generic("Generic options");
@@ -39,7 +39,7 @@ int main(int ac, char* av[]) {
 		p.add("image", -1);
 
 		po::variables_map vm;
-		po::store(po::command_line_parser(ac, av).options(cmdline_options).positional(p).run(), vm);
+		po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
 
 		if (vm.count("help")) {
 			cout << "Usage: read_text [image] <options>\n\n" << generic << endl << mode << endl << config << endl;
