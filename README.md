@@ -9,13 +9,17 @@ Dependencies
 ------------
 Use [Homebrew](http://mxcl.github.com/homebrew/) for installation on OS X.
 
-**Tesseract 3.01**
+[**Tesseract 3.01**](http://code.google.com/p/tesseract-ocr/)
 
 	brew install tesseract
 
-**OpenCV 2.3.1**
+[**OpenCV 2.3.1**](http://opencv.willowgarage.com/)
 
 	brew install opencv
+
+[**Boost**](http://www.boost.org/)
+
+	brew install boost
 
 Help
 ----
