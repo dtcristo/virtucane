@@ -10,10 +10,13 @@ Dependencies
 Use [Homebrew](http://mxcl.github.com/homebrew/) for installation on OS X.
 
 **Tesseract 3.01**
+
 	brew install tesseract
 
 **OpenCV 2.3.1**
+
 	brew install opencv
+
 Help
 ----
 After building, run `read_text` for the following help:
