@@ -8,7 +8,7 @@ Installation (Mac OS X)
 -----------------------
 The easiest way to install on Mac OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
 
-Install Homebrew. See the Homebrew [Installation Guide](https://github.com/mxcl/homebrew/wiki/installation) for more info.
+Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info.
 
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
 
@@ -35,6 +35,10 @@ Example usage
 To detect text in an image, filter the OCR results, then speak; run the following command:
 
 	read_text image.jpg -f -s
+
+To batch process a folder of images, use the Python script. The script uses the `-v -f` options.
+
+	python read_text_batch /directory/with/images/
 
 Help
 ----

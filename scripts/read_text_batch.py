@@ -5,7 +5,7 @@ import sys
 
 # This script performs batch 'read text' on a directory of images.
 
-def batch(path):
+def read_text_batch(path):
 	dirlist = os.listdir(path)
 	executeBin = "read_text -v -f "
 	print "Current directory: " + path
@@ -17,7 +17,7 @@ def batch(path):
 				execute = executeBin + absolutePath
 				os.system(execute)
 		else:
-			batch(absolutePath)
+			read_text_batch(absolutePath)
 
 if __name__ == "__main__":
-	batch(sys.argv[1]);
+	read_text_batch(sys.argv[1]);

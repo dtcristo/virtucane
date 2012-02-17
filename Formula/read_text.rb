@@ -11,5 +11,6 @@ class ReadText < Formula
   def install
     system "make"
     bin.install "read_text"
+    bin.install "scripts/read_text_batch.py"
   end
 end
