@@ -1,6 +1,5 @@
 read_text
 =========
-
 A command line tool for speaking text in an image. Tested on Mac OS X but should work anywhere.
 
 This is a fork of [Menglong Zhu](http://www.seas.upenn.edu/~menglong/)'s ROS package [read_text](http://www.ros.org/wiki/read_text). I have made modifications for my own needs.
@@ -21,7 +20,6 @@ Run the installation command:
 
 	brew install --HEAD read_text
 
-
 Dependencies
 ------------
 If you use Homebrew, it will automatically take care of dependencies.
@@ -30,13 +28,17 @@ If you use Homebrew, it will automatically take care of dependencies.
 
 [**OpenCV**](http://opencv.willowgarage.com/)
 
-[**Boost**](http://www.boost.org/)
+[**Boost C++ Libraries**](http://www.boost.org/)
 
-	brew install boost
+Example usage
+-------------
+To detect text in an image, filter the OCR results, then speak; run the following command:
+
+	read_text image.jpg -f -s
 
 Help
 ----
-After building, run `read_text` for the following help:
+After building, run `read_text --help` for the following help:
 
 	Usage: read_text <image> [options]
 
