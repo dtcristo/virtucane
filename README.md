@@ -25,7 +25,7 @@ Help
 ----
 After building, run `read_text` for the following help:
 
-	Usage: read_text [image] <options>
+	Usage: read_text <image> [options]
 
 	Generic options:
   		-h [ --help ]         Print this help message.

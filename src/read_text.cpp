@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 		po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
 
 		if (vm.count("help")) {
-			cout << "Usage: read_text [image] <options>\n\n" << generic << endl << mode << endl << config << endl;
+			cout << "Usage: read_text <image> [options]\n\n" << generic << endl << mode << endl << config << endl;
 			return 1;
 		}
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 			detector.detect(vm["image"].as<string>());
 		}
 		else {
-			cout << "Usage: read_text [image] <options>\n\n" << generic << endl << mode << endl << config << endl;
+			cout << "Usage: read_text <image> [options]\n\n" << generic << endl << mode << endl << config << endl;
 			return 1;
 		}
 
