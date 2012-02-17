@@ -5,17 +5,30 @@ A command line tool for speaking text in an image. Tested on Mac OS X but should
 
 This is a fork of [Menglong Zhu](http://www.seas.upenn.edu/~menglong/)'s ROS package [read_text](http://www.ros.org/wiki/read_text). I have made modifications for my own needs.
 
+Installation (Mac OS X)
+-----------------------
+The easiest way to install on Mac OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
+
+Install Homebrew. See the Homebrew [Installation Guide](https://github.com/mxcl/homebrew/wiki/installation) for more info.
+
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
+
+Install the read_text formula to `/usr/local/Library/Formula/`:
+
+	curl -o /usr/local/Library/Formula/read_text.rb https://raw.github.com/dtcristo/read_text/master/Formula/read_text.rb
+
+Run the installation command:
+
+	brew install --HEAD read_text
+
+
 Dependencies
 ------------
-Use [Homebrew](http://mxcl.github.com/homebrew/) for installation on OS X.
+If you use Homebrew, it will automatically take care of dependencies.
 
-[**Tesseract 3.01**](http://code.google.com/p/tesseract-ocr/)
+[**Tesseract**](http://code.google.com/p/tesseract-ocr/)
 
-	brew install tesseract
-
-[**OpenCV 2.3.1**](http://opencv.willowgarage.com/)
-
-	brew install opencv
+[**OpenCV**](http://opencv.willowgarage.com/)
 
 [**Boost**](http://www.boost.org/)
 
