@@ -36,9 +36,9 @@ To detect text in an image, filter the OCR results, then speak; run the followin
 
 	read_text image.jpg -f -s
 
-To batch process a folder of images, use the Python script. The script uses the `-v -f` options.
+To batch process a folder of images, use the Python script. The script uses the `-f` option.
 
-	python read_text_batch /directory/with/images/
+	python /usr/local/bin/read_text_batch.py /directory/with/images/
 
 Help
 ----

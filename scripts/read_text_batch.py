@@ -7,7 +7,7 @@ import sys
 
 def read_text_batch(path):
 	dirlist = os.listdir(path)
-	executeBin = "read_text -v -f "
+	executeBin = "read_text -f "
 	print "Current directory: " + path
 	for name in dirlist:
 		absolutePath = os.path.join(path,name)
