@@ -8,17 +8,14 @@ Installation (Mac OS X)
 -----------------------
 The easiest way to install on Mac OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
 
-Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info.
+Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info. Make sure you have [Xcode](https://developer.apple.com/xcode/) installed first.
 
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
 
-Install the read_text formula to `/usr/local/Library/Formula/`:
-
-	curl -o /usr/local/Library/Formula/read_text.rb https://raw.github.com/dtcristo/read_text/master/Formula/read_text.rb
 
 Run the installation command:
 
-	brew install --HEAD read_text
+	brew install --HEAD https://raw.github.com/dtcristo/read_text/master/Formula/read_text.rb
 
 Dependencies
 ------------
