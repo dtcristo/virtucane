@@ -1,21 +1,20 @@
 read_text
 =========
-A command line tool for speaking text in an image. Tested on Mac OS X but should work anywhere.
+A command line tool for speaking text in an image. Tested in OS X but should work anywhere.
 
 This is a fork of [Menglong Zhu](http://www.seas.upenn.edu/~menglong/)'s ROS package [read_text](http://www.ros.org/wiki/read_text). I have made modifications for my own needs.
 
-Installation (Mac OS X)
+Installation (OS X)
 -----------------------
-The easiest way to install on Mac OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
+The easiest way to install on OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
 
-Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info. Make sure you have [Xcode](https://developer.apple.com/xcode/) installed first.
+1. Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info. Make sure you have [Xcode](https://developer.apple.com/xcode/) installed first, alternatively [Commannd Line Tools for Xcode](https://developer.apple.com/downloads/index.action?=command%20line%20tools).
 
-	/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
+		/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
 
+2. Run the installation command:
 
-Run the installation command:
-
-	brew install --HEAD https://raw.github.com/dtcristo/read_text/master/Formula/read_text.rb
+		brew install --HEAD https://raw.github.com/dtcristo/read_text/master/Formula/read_text.rb
 
 Dependencies
 ------------
