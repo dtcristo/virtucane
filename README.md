@@ -10,7 +10,7 @@ The easiest way to install on OS X is to use [Homebrew](http://mxcl.github.com/h
 
 1. Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info. Make sure you have [Xcode](https://developer.apple.com/xcode/) installed first, alternatively [Commannd Line Tools for Xcode](https://developer.apple.com/downloads/index.action?=command%20line%20tools).
 
-		/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
+		/usr/bin/ruby -e "$(/usr/bin/curl -fsSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)"
 
 2. Run the installation command:
 
