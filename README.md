@@ -5,7 +5,7 @@ A command line tool for speaking text in an image. Tested in OS X but should wor
 This is a fork of [Menglong Zhu](http://www.seas.upenn.edu/~menglong/)'s ROS package [read_text](http://www.ros.org/wiki/read_text). I have made modifications for my own needs.
 
 Installation (OS X)
------------------------
+-------------------
 The easiest way to install on OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
 
 1. Install Homebrew. See the Homebrew [Installation](https://github.com/mxcl/homebrew/wiki/installation) for more info. Make sure you have [Xcode](https://developer.apple.com/xcode/) installed first, alternatively [Commannd Line Tools for Xcode](https://developer.apple.com/downloads/index.action?=command%20line%20tools).
@@ -26,7 +26,7 @@ If you use Homebrew, it will automatically take care of dependencies.
 
 [**Boost C++ Libraries**](http://www.boost.org/)
 
-Example usage
+Example Usage
 -------------
 To detect text in an image, filter the OCR results, then speak; run the following command:
 
