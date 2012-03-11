@@ -11,9 +11,16 @@
 # generated files
 bin/
 gen/
+lib/
 
 # Local configuration file (sdk path, etc)
 local.properties
 
 # Miscellaneous files
 misc/
+
+# Eclipse related
+.cproject
+.project
+Debug/
+build/
