@@ -1,6 +1,6 @@
 Virtucane
 =========
-An assistive "virtual cane" app for the visually impaired. Once complete, it will assist blind people with everyday tasks. One of which is environmental text recognition. In the future, this may extend to localising an individual in a large environment (such as a shopping centre or airport).
+An assistive "virtual cane" for the visually impaired. Once complete, it will assist blind people with everyday tasks. One of which is environmental text recognition. In the future, this may extend to localising an individual in a large environment (such as a shopping centre or airport).
 
 There are two main aspects of this project:
 
