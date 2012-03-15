@@ -7,7 +7,7 @@ There are two main aspects of this project:
 * A set of command line tools for text recognition and simulation.
 * A deployed implementation on Android.
 
-A development log and more documentation is availale on the [wiki](https://github.com/dtcristo/virtucane/wiki).
+See the [wiki](https://github.com/dtcristo/virtucane/wiki) for further documentation on the project.
 
 Text recognition tools
 ----------------------
