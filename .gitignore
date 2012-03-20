@@ -22,5 +22,5 @@ misc/
 # Eclipse related
 .cproject
 .project
-*/Debug/
-*/build/
+*/*/Debug/
+*/*/build/
