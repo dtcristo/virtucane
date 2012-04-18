@@ -4,10 +4,8 @@
  * @author OpenCV team
  */
 
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 #include <iostream>
-#include <stdio.h>
 
 using namespace std;
 using namespace cv;
@@ -53,18 +51,12 @@ int main(int argc, char** argv) {
 		capture.retrieve(frame);
 
 		cvtColor(frame, gray, CV_RGB2GRAY);
+		//threshold(gray, binary, 10, 255, THRESH_OTSU);
+		//cvtColor(binary, binary, CV_GRAY2RGB);
 
 		binary = gray;
-		//threshold(gray, binary, 10, 255, THRESH_OTSU);
 
 		//imshow(window_name, binary);
-
-//		if (!frame.empty()) {
-//			detectAndDisplay(frame);
-//		} else {
-//			//printf("Error: No captured frame -- Break!\n");
-//			//break;
-//		}
 
 		MatchingMethod(0, 0);
 
