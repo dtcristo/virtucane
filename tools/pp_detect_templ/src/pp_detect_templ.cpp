@@ -21,13 +21,15 @@ int match_method;
 int max_Trackbar = 5;
 
 /// Function Headers
-void MatchingMethod(int, void*);
+void MatchingMethod();
+vector<Point> getMatches(Mat I, int thresh, bool max);
 
 /**
  * @function main
  */
 int main(int argc, char** argv) {
 
+	int threshold = 100;
 	Mat frame, gray, binary;
 
 	VideoCapture capture(0);
@@ -50,18 +52,38 @@ int main(int argc, char** argv) {
 		capture.grab();
 		capture.retrieve(frame);
 
-		//cvtColor(frame, gray, CV_RGB2GRAY);
+		cvtColor(frame, gray, CV_RGB2GRAY);
 		//threshold(gray, binary, 10, 255, THRESH_OTSU);
 		//cvtColor(binary, binary, CV_GRAY2RGB);
 
 		scene = frame;
 
-		//imshow(window_name, binary);
+		//imshow(image_window, gray);
 
-		MatchingMethod(0, 0);
+		//MatchingMethod();
 
-		if (waitKey(30) >= 0)
+		int c = waitKey(30);
+		if ((char) c == 'q') {
 			break;
+		} else if ((char) c == 'x') {
+			threshold += 10;
+			cout << "Threshold +10 = " << threshold << endl;
+		} else if ((char) c == 'z') {
+			threshold -= 10;
+			cout << "Threshold -10 = " << threshold << endl;
+		} else if ((char) c == 'p') {
+
+			cout << "\nPrinting points" << endl;
+			vector<Point> matchedPoints = getMatches(gray, threshold, false);
+
+			for (int i = 0; i < matchedPoints.size(); i++) {
+				cout << "x = " << matchedPoints[i].x << "\ty = "
+						<< matchedPoints[i].y << endl;
+				circle(frame, matchedPoints[i], 5, Scalar(0, 0, 255));
+
+			}
+			imshow(image_window, frame);
+		}
 	}
 
 	return 0;
@@ -71,7 +93,7 @@ int main(int argc, char** argv) {
  * @function MatchingMethod
  * @brief Trackbar callback
  */
-void MatchingMethod(int, void*) {
+void MatchingMethod() {
 	/// Source image to display
 	Mat img_display;
 	scene.copyTo(img_display);
@@ -114,4 +136,36 @@ void MatchingMethod(int, void*) {
 	imshow(result_window, result);
 
 	return;
+}
+
+vector<Point> getMatches(Mat I, int thresh, bool max = true) {
+
+	// accept only char type matrices
+	CV_Assert(I.depth() != sizeof(uchar));
+
+	assert(I.channels() == 1);
+
+	vector<Point> matchPoints;
+
+	int nRows = I.rows;
+	int nCols = I.cols;
+
+	int i, j;
+	uchar* p;
+	for (i = 0; i < nRows; ++i) {
+		p = I.ptr<uchar>(i);
+		for (j = 0; j < nCols; ++j) {
+			if (max) {
+				if (p[j] >= thresh) {
+					matchPoints.push_back(Point(j, i));
+				}
+			} else {
+				if (p[j] <= thresh) {
+					matchPoints.push_back(Point(j, i));
+				}
+			}
+		}
+	}
+
+	return matchPoints;
 }
