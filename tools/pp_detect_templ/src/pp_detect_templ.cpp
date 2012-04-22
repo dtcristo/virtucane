@@ -12,33 +12,25 @@ scaleTempl(Mat templ, vector<Mat> &templates, vector<Size> &sizes, float factor,
 int
 main(int argc, char** argv)
 {
-    int match_method = 5;
+    int matchMethod = 5;
     float threshold = 0.4;
-    int numTempl = 4;
-    float scaleFactor = 0.6;
+    int numTempl = 6;
+    float scaleFactor = 0.7;
 
     Mat templ;
     Mat frame;
     Mat gray;
-    Mat binary;
-    Mat scene;
-    //Mat result;
-    //Mat result_norm;
-    Mat img_display;
 
     VideoCapture capture(0);
     if (!capture.isOpened())
         return -1;
 
-    string frame_window = "Webcam";
-    string image_window = "Detected";
-    //string result_window = "Result";
-    namedWindow(frame_window, CV_WINDOW_AUTOSIZE);
-    namedWindow(image_window, CV_WINDOW_AUTOSIZE);
-    //namedWindow(result_window, CV_WINDOW_AUTOSIZE);
+    string frameWindow = "Webcam";
+    string matchWindow = "Matches";
+    namedWindow(frameWindow, CV_WINDOW_AUTOSIZE);
+    namedWindow(matchWindow, CV_WINDOW_AUTOSIZE);
 
     cvtColor(imread("templ.png", 1), templ, CV_RGB2GRAY);
-    //Size s(templ.cols, templ.rows);
 
     vector<Mat> templates;
     vector<Size> sizes;
@@ -46,113 +38,88 @@ main(int argc, char** argv)
 
     for (;;)
     {
-        capture.grab();
-        capture.retrieve(frame);
-        imshow(frame_window, frame);
-
+        capture >> frame;
+        imshow(frameWindow, frame);
         cvtColor(frame, gray, CV_RGB2GRAY);
-        //threshold(gray, binary, 10, 255, THRESH_OTSU);
-        //cvtColor(binary, binary, CV_GRAY2RGB);
 
-        scene = gray;
+        vector<Rect> matches;
 
+        for (vector<Mat>::iterator it = templates.begin(); it != templates.end(); ++it)
+        {
+            Mat result;
+            Mat resultNorm;
+            Size s(it->cols, it->rows);
+
+            int resultCols = gray.cols - it->cols + 1;
+            int resultRows = gray.rows - it->rows + 1;
+            result.create(resultCols, resultRows, CV_32FC1);
+
+            matchTemplate(gray, *it, result, matchMethod);
+
+//            normalize(result, resultNorm, 0, 1, NORM_MINMAX, -1, Mat());
+//            cvtColor(resultNorm, resultNorm, CV_GRAY2RGB);
+
+//            double minVal;
+//            double maxVal;
+//            Point minLoc;
+//            Point maxLoc;
+
+//            minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
+//            matchedPoints.push_back(maxLoc);
+
+            getMatches(result, s, matches, threshold);
+        }
+
+        cvtColor(gray, gray, CV_GRAY2RGB);
+
+        for (vector<Rect>::iterator it = matches.begin(); it != matches.end(); ++it)
+            rectangle(gray, *it, Scalar(0, 0, 255));
+
+        imshow(matchWindow, gray);
+
+        // Wait 30ms and poll keystrokes.
         int c = waitKey(30);
-        if ((char) c == 27 /*esc key*/)
+        if ((char) c == 27 /*ESC key*/)
         {
             break;
         }
         else if ((char) c == 'x')
         {
             threshold += 0.01;
-            cout << "Threshold +0.01 = " << threshold << endl;
+            cout << "threshold +0.01 = " << threshold << endl;
         }
         else if ((char) c == 'z')
         {
             threshold -= 0.01;
-            cout << "Threshold -0.01 = " << threshold << endl;
+            cout << "threshold -0.01 = " << threshold << endl;
         }
         else if ((char) c == '1')
         {
-            match_method = 1;
-            cout << "match_method = SQDIFF (" << match_method << ")" << endl;
+            matchMethod = 1;
+            cout << "matchMethod = SQDIFF (1)" << endl;
         }
         else if ((char) c == '2')
         {
-            match_method = 2;
-            cout << "match_method = SQDIFF NORMED (" << match_method << ")" << endl;
+            matchMethod = 2;
+            cout << "matchMethod = SQDIFF NORMED (2)" << endl;
         }
         else if ((char) c == '3')
         {
-            match_method = 3;
-            cout << "match_method = TM CCORR (" << match_method << ")" << endl;
+            matchMethod = 3;
+            cout << "matchMethod = TM CCORR (3)" << endl;
         }
         else if ((char) c == '4')
         {
-            match_method = 4;
-            cout << "match_method = TM COEFF (" << match_method << ")" << endl;
+            matchMethod = 4;
+            cout << "matchMethod = TM COEFF (4)" << endl;
         }
         else if ((char) c == '5')
         {
-            match_method = 5;
-            cout << "match_method = TM COEFF NORMED (" << match_method << ")" << endl;
-        }
-        else if ((char) c == 'r')
-        {
-            scene.copyTo(img_display);
-            cvtColor(img_display, img_display, CV_GRAY2RGB);
-
-            vector<Rect> matches;
-
-            cout << "Processing current frame" << endl;
-            int x = 0;
-            for (vector<Mat>::iterator it = templates.begin(); it != templates.end(); ++it)
-            {
-                Mat result;
-                Mat result_norm;
-                Size s(it->cols, it->rows);
-
-                int result_cols = scene.cols - it->cols + 1;
-                int result_rows = scene.rows - it->rows + 1;
-                result.create(result_cols, result_rows, CV_32FC1);
-
-                matchTemplate(scene, *it, result, match_method);
-
-                normalize(result, result_norm, 0, 1, NORM_MINMAX, -1, Mat());
-                cvtColor(result_norm, result_norm, CV_GRAY2RGB);
-
-                double minVal;
-                double maxVal;
-                Point minLoc;
-                Point maxLoc;
-                Point matchLoc;
-
-                minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
-                //matchedPoints.push_back(maxLoc);
-                cout << "maxVal (scale " << x << ") = " << result.at<float>(maxLoc) << endl;
-
-                getMatches(result, s, matches, threshold);
-
-//                if (match_method == CV_TM_SQDIFF || match_method == CV_TM_SQDIFF_NORMED)
-//                    getMatches(result, s, matches, threshold, false);
-//                else
-//                    getMatches(result, s, matches, threshold, true);
-
-                cout << "matches.size() (scale " << x << ") = " << matches.size() << endl;
-
-                x++;
-            }
-            cout << endl;
-
-            for (vector<Rect>::iterator it = matches.begin(); it != matches.end(); ++it)
-            {
-                rectangle(img_display, *it, Scalar(0, 0, 255));
-                //circle(result_norm, it->tl(), 1, Scalar(0, 0, 255));
-            }
-
-            imshow(image_window, img_display);
-            //imshow(result_window, result_norm);
+            matchMethod = 5;
+            cout << "matchMethod = TM COEFF NORMED (5)" << endl;
         }
     }
+
     return 0;
 }
 
