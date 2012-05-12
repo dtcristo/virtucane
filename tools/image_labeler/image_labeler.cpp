@@ -1,13 +1,18 @@
 #include "opencv2/opencv.hpp"
+#include "dirent.h"
 #include <iostream>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
 
-Mat lolcat;
+Mat image;
 bool first;
+bool done;
 Point pt1;
 Point pt2;
+string fileName;
+size_t extentionPos;
 
 void
 onMouse(int event, int x, int y, int, void*)
@@ -18,14 +23,16 @@ onMouse(int event, int x, int y, int, void*)
     if (first)
     {
         first = false;
+        done = false;
         pt1 = Point(x, y);
     }
     else
     {
         first = true;
         pt2 = Point(x, y);
-        rectangle(lolcat, pt1, pt2, Scalar(255, 0, 0), 3);
-        imshow("Image", lolcat);
+        rectangle(image, pt1, pt2, Scalar(255, 0, 0), 3);
+        imshow("Image", image);
+        done = true;
     }
 }
 
@@ -33,23 +40,78 @@ int
 main(int, char**)
 {
     namedWindow("Image", 1);
-    lolcat = imread("lol.jpg");
-    imshow("Image", lolcat);
-    setMouseCallback("Image", onMouse, 0);
+    cvSetMouseCallback("Image", onMouse);
 
-    for (;;)
+    DIR *dir;
+    struct dirent *ent;
+    string path = "/Volumes/dtcristo/lolcats/";
+    dir = opendir("/Volumes/dtcristo/lolcats/");
+
+    if (dir != NULL)
     {
-        int c = waitKey(1);
-        if ((char) c == 27 /*ESC key*/)
+        while ((ent = readdir(dir)) != NULL)
         {
-            break;
+            stringstream ss;
+
+            ss.str("");
+            ss << path << ent->d_name;
+            fileName = ss.str();
+
+            extentionPos = fileName.find(".jpg");
+            if (extentionPos != string::npos)
+            {
+                done = false;
+                image = imread(fileName);
+                if (!image.data) // Check for invalid input
+                {
+                    cout << "Could not open or find the image" << endl;
+                    return -1;
+                }
+                imshow("Image", image);
+
+                for (;;)
+                {
+                    int c = waitKey(1);
+                    if ((char) c == 27 /*ESC key*/)
+                    {
+                        return 0;
+                    }
+                    else if ((char) c == 'c')
+                    {
+                        first = true;
+                        done = false;
+                        cout << "Data cleared" << endl;
+                        image = imread(fileName);
+                        imshow("Image", image);
+                    }
+                    else if ((char) c == ' ')
+                    {
+                        if (done)
+                        {
+                            string outFileName = fileName;
+                            outFileName.replace(extentionPos, 4, ".txt");
+
+                            ofstream outFile;
+                            outFile.open(outFileName.c_str());
+                            outFile << pt1.x << "," << pt1.y << "," << pt2.x << "," << pt2.y;
+                            outFile.close();
+
+                            cout << "Written: \"" << pt1.x << "," << pt1.y << "," << pt2.x << "," << pt2.y << "\" to file." << endl;
+                            cout << outFileName << endl;
+                            break;
+                        }
+                    }
+                }
+            }
         }
-        else if ((char) c == ' ')
-        {
-            first = true;
-            lolcat = imread("lol.jpg");
-            imshow("Image", lolcat);
-        }
+        closedir(dir);
+        cout << "Done!" << endl;
+        return 0;
+    }
+    else
+    {
+        cout << "Could not open directory" << endl;
+        return -1;
     }
 
     return 0;
