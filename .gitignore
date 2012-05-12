@@ -16,12 +16,16 @@
 # Local configuration file (sdk path, etc)
 local.properties
 
-# Miscellaneous files
-misc/
-
 # Eclipse related
 .cproject
 .project
-*/*/Debug/
-*/*/Release/
-*/*/build/
+*/Debug/
+*/Release/
+*/build/
+
+# NetBeans related
+*/nbproject/
+*/build/
+*/dist/
+*/Makefile
+*/.dep.inc
