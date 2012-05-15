@@ -30,7 +30,7 @@ onMouse(int event, int x, int y, int, void*)
     {
         first = true;
         pt2 = Point(x, y);
-        rectangle(image, pt1, pt2, Scalar(255, 0, 0), 3);
+        rectangle(image, pt1, pt2, Scalar(255, 0, 0));
         imshow("Image", image);
         done = true;
     }
@@ -44,7 +44,7 @@ main(int, char**)
 
     DIR *dir;
     struct dirent *ent;
-    string path = "/Volumes/dtcristo/lolcats/";
+    string path = "/Volumes/dtcristo/pp_resized/";
     dir = opendir(path.c_str());
 
     if (dir != NULL)
@@ -56,8 +56,8 @@ main(int, char**)
             ss.str("");
             ss << path << ent->d_name;
             fileName = ss.str();
-
-            extentionPos = fileName.find(".jpg");
+            cout << fileName << endl;
+            extentionPos = fileName.find(".JPG");
             if (extentionPos != string::npos)
             {
                 done = false;
@@ -98,6 +98,21 @@ main(int, char**)
 
                             cout << "Written: \"" << pt1.x << "," << pt1.y << "," << pt2.x << "," << pt2.y << "\" to file." << endl;
                             cout << outFileName << endl;
+
+                            string word;
+                            ifstream inFile(outFileName.c_str());
+                            if (inFile.is_open())
+                            {
+                                while (inFile.good())
+                                {
+                                    getline(inFile, word, ',');
+                                    int coord = atoi(word.c_str());
+                                    cout << word << endl;
+                                }
+                                inFile.close();
+                            }
+                            else cout << "Unable to open file" << endl;
+                            
                             break;
                         }
                     }
