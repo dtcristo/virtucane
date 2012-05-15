@@ -8,14 +8,10 @@
 
 #define SCALE_FACTOR    0.7
 #define NUM_TEMPL       7
-#define OPEN_DIR        false
+#define OPEN_DIR        true
 
 using namespace cv;
 using namespace std;
-
-Mat templ;
-Mat frame;
-Mat gray;
 
 void getMatches(Mat result, Size s, vector<Rect> &matches, float thresh);
 void scaleTempl(Mat templ, vector<Mat> &templates, vector<Size> &sizes);
@@ -23,8 +19,11 @@ void matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, S
 
 int main(int argc, char** argv)
 {
+    Mat templ;
+    Mat gray;
+
     int matchMethod = 5;
-    float threshold = 0.6;
+    float threshold = 0.5;
 
     cvtColor(imread("crop100.png", 1), templ, CV_RGB2GRAY);
 
@@ -34,6 +33,12 @@ int main(int argc, char** argv)
 
     if (OPEN_DIR)
     {
+        int truePosCount = 0;
+        int falsePosCount = 0;
+        int trueNegCount = 0;
+        int falseNegCount = 0;
+        int totalCount = 0;
+        
         Mat image;
         Point pt1;
         Point pt2;
@@ -44,7 +49,7 @@ int main(int argc, char** argv)
 
         DIR *dir;
         struct dirent *ent;
-        string path = "/Volumes/dtcristo/lolcats/";
+        string path = "/Volumes/dtcristo/pp_resized/";
         dir = opendir(path.c_str());
 
         if (dir != NULL)
@@ -57,7 +62,7 @@ int main(int argc, char** argv)
                 ss << path << ent->d_name;
                 fileName = ss.str();
 
-                extentionPos = fileName.find(".jpg");
+                extentionPos = fileName.find(".JPG");
                 if (extentionPos != string::npos)
                 {
                     image = imread(fileName);
@@ -66,6 +71,53 @@ int main(int argc, char** argv)
                         cout << "Could not open or find the image" << endl;
                         return -1;
                     }
+
+                    //------------ READ METADATA-------------
+                    string txtFileName = fileName;
+                    txtFileName.replace(extentionPos, 4, ".txt");
+                    string word;
+                    ifstream inFile(txtFileName.c_str());
+                    if (inFile.is_open())
+                    {
+                        getline(inFile, word, ',');
+                        pt1.x = atoi(word.c_str());
+                        getline(inFile, word, ',');
+                        pt1.y = atoi(word.c_str());
+                        getline(inFile, word, ',');
+                        pt2.x = atoi(word.c_str());
+                        getline(inFile, word, ',');
+                        pt2.y = atoi(word.c_str());
+                        inFile.close();
+                    }
+                    else cout << "Unable to open .txt file" << endl;
+                    
+                    Rect trueArea(pt1, pt2);
+                    //---------------------------------------------
+
+                    cvtColor(image, gray, CV_RGB2GRAY);
+
+                    Point matchTopLeft;
+                    Size matchSize;
+                    
+                    matchAllTemplates(gray, templates, matchTopLeft, matchSize, threshold, matchMethod);
+                    
+                    Point matchCentroid;
+                    matchCentroid.x = matchTopLeft.x + matchSize.width/2;
+                    matchCentroid.y = matchTopLeft.y + matchSize.height/2;
+                    
+                    bool trueMatch = (matchCentroid.x >= pt1.x) && (matchCentroid.x <= pt2.x) && (matchCentroid.y >= pt1.y) && (matchCentroid.y <= pt1.y);
+
+                    // Drawing functions
+                    rectangle(image, trueArea, Scalar(255, 0, 0));
+                    if (trueMatch)
+                    {
+                        rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
+                    }
+                    else
+                    {
+                        rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
+                    }
+
                     imshow("Image", image);
 
                     for (;;)
@@ -93,6 +145,8 @@ int main(int argc, char** argv)
     }
     else
     {
+        Mat frame;
+        
         VideoCapture capture(0);
         if (!capture.isOpened())
         {
