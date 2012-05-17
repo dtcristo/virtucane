@@ -15,7 +15,8 @@ using namespace std;
 
 void getMatches(Mat result, Size s, vector<Rect> &matches, float thresh);
 void scaleTempl(Mat templ, vector<Mat> &templates, vector<Size> &sizes);
-void matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, Size &largest_size, float threshold, int matchMethod);
+bool matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, Size &largest_size, float threshold, int matchMethod);
+void printResults(int TN, int TP, int FN, int FP, int TG, int TF);
 
 int main(int argc, char** argv)
 {
@@ -23,7 +24,7 @@ int main(int argc, char** argv)
     Mat gray;
 
     int matchMethod = 5;
-    float threshold = 0.5;
+    float threshold = 0.7;
 
     cvtColor(imread("crop100.png", 1), templ, CV_RGB2GRAY);
 
@@ -33,11 +34,14 @@ int main(int argc, char** argv)
 
     if (OPEN_DIR)
     {
-        int truePosCount = 0;
-        int falsePosCount = 0;
-        int trueNegCount = 0;
-        int falseNegCount = 0;
-        int totalCount = 0;
+        int TN = 0;
+        int TP = 0;
+        int FN = 0;
+        int FP = 0;
+        int TG = 0;
+        int TF = 0;
+        
+        bool isPP;
         
         Mat image;
         Point pt1;
@@ -65,6 +69,8 @@ int main(int argc, char** argv)
                 extentionPos = fileName.find(".JPG");
                 if (extentionPos != string::npos)
                 {
+                    TF++;
+                    
                     image = imread(fileName);
                     if (!image.data) // Check for invalid input
                     {
@@ -88,34 +94,50 @@ int main(int argc, char** argv)
                         getline(inFile, word, ',');
                         pt2.y = atoi(word.c_str());
                         inFile.close();
+                        
+                        isPP = true;
+                        TG++;
                     }
-                    else cout << "Unable to open .txt file" << endl;
+                    else
+                    {
+                        isPP = false;
+                    }
                     
                     Rect trueArea(pt1, pt2);
+                    
                     //---------------------------------------------
 
                     cvtColor(image, gray, CV_RGB2GRAY);
 
                     Point matchTopLeft;
                     Size matchSize;
+                    bool foundMatch = matchAllTemplates(gray, templates, matchTopLeft, matchSize, threshold, matchMethod);
                     
-                    matchAllTemplates(gray, templates, matchTopLeft, matchSize, threshold, matchMethod);
+                    if (isPP) rectangle(image, trueArea, Scalar(255, 0, 0));
                     
-                    Point matchCentroid;
-                    matchCentroid.x = matchTopLeft.x + matchSize.width/2;
-                    matchCentroid.y = matchTopLeft.y + matchSize.height/2;
-                    
-                    bool trueMatch = (matchCentroid.x >= pt1.x) && (matchCentroid.x <= pt2.x) && (matchCentroid.y >= pt1.y) && (matchCentroid.y <= pt1.y);
-
-                    // Drawing functions
-                    rectangle(image, trueArea, Scalar(255, 0, 0));
-                    if (trueMatch)
+                    if (!foundMatch)
                     {
-                        rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
+                        if (isPP)
+                            FN++;
+                        else
+                            TN++;
                     }
                     else
                     {
-                        rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
+                        Point matchCentroid;
+                        matchCentroid.x = matchTopLeft.x + matchSize.width/2;
+                        matchCentroid.y = matchTopLeft.y + matchSize.height/2;
+                        
+                        if (matchCentroid.inside(trueArea))
+                        {
+                            TP++;
+                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
+                        }
+                        else
+                        {
+                            FP++;
+                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
+                        }
                     }
 
                     imshow("Image", image);
@@ -135,7 +157,7 @@ int main(int argc, char** argv)
                 }
             }
             closedir(dir);
-            cout << "Done!" << endl;
+            printResults(TN, TP, FN, FP, TG, TF);
         }
         else
         {
@@ -266,10 +288,11 @@ void scaleTempl(Mat templ, vector<Mat> &templates, vector<Size> &sizes)
     }
 }
 
-void matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, Size &largest_size, float threshold, int matchMethod)
+bool matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, Size &largest_size, float threshold, int matchMethod)
 {
     //vector<Rect> matches;
     float largest_val = 0;
+    bool retval = false;
 
     //timeval a;
     //timeval b;
@@ -302,11 +325,30 @@ void matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, S
             largest_val = current;
             largest_point = maxLoc;
             largest_size = s;
+            retval = true;
         }
 
         //if (matches.size() < 5)
         //    getMatches(result, s, matches, threshold);
     }
+    return retval;
     //gettimeofday(&b, 0);
     //cout << "Time in msec = " << (b.tv_usec - a.tv_usec)/1000 << endl;
+}
+
+void printResults(int TN, int TP, int FN, int FP, int TG, int TF)
+{
+    cout << "----------------" << endl;
+    cout << "PRINTING RESULTS" << endl;
+    cout << "----------------" << endl;
+    cout << endl;
+    cout << "Tracker Detection Rate = " << (float)TP/TG << endl;
+    cout << "False Alarm Rate = " << (float)FP/(TP+FP) << endl;
+    cout << "Detection Rate = " << (float)TP/(TP+FN) << endl;
+    cout << "Specificity = " << (float)TN/(FP+TN) << endl;
+    cout << "Accuracy = " << (float)(TP+TN)/TF << endl;
+    cout << "Positive Prediction = " << (float)TP/(TP+FP) << endl;
+    cout << "Negative Prediction = " << (float)TN/(FN+TN) << endl;
+    cout << "False Negative Rate = " << (float)FN/(FN+TP) << endl;
+    cout << "False Positive Rate = " << (float)FP/(FP+TN) << endl;
 }
