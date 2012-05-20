@@ -7,7 +7,7 @@
 #include <sys/time.h>
 
 #define SCALE_FACTOR    0.7
-#define NUM_TEMPL       7
+#define NUM_TEMPL       3
 #define OPEN_DIR        true
 
 using namespace cv;
@@ -18,22 +18,24 @@ void scaleTempl(Mat templ, vector<Mat> &templates, vector<Size> &sizes);
 bool matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, Size &largest_size, float threshold, int matchMethod);
 void printResults(int TN, int TP, int FN, int FP, int TG, int TF);
 
+
+/** Function Headers */
+ void detectAndDisplay( Mat frame );
+
+ /** Global variables */
+ String haarClassifier = "HAAR2.xml";
+ //String lbpClassifier = "LBP.xml";
+ CascadeClassifier haarCascade;
+ CascadeClassifier lbpCascade;
+ string window = "Image";
+ RNG rng(12345);
+
 int main(int argc, char** argv)
 {
-    Mat templ;
-    Mat gray;
+   //-- 1. Load the cascades
+   //if( !lbpCascade.load( lbpClassifier ) ){ printf("--(!)Error loading\n"); return -1; };
+   if( !haarCascade.load( haarClassifier ) ){ printf("--(!)Error loading\n"); return -1; };
 
-    int matchMethod = 5;
-    float threshold = 0.7;
-
-    cvtColor(imread("crop100.png", 1), templ, CV_RGB2GRAY);
-
-    vector<Mat> templates;
-    vector<Size> sizes;
-    scaleTempl(templ, templates, sizes);
-
-    if (OPEN_DIR)
-    {
         int TN = 0;
         int TP = 0;
         int FN = 0;
@@ -107,40 +109,36 @@ int main(int argc, char** argv)
                     
                     //---------------------------------------------
 
-                    cvtColor(image, gray, CV_RGB2GRAY);
-
-                    Point matchTopLeft;
-                    Size matchSize;
-                    bool foundMatch = matchAllTemplates(gray, templates, matchTopLeft, matchSize, threshold, matchMethod);
+                    detectAndDisplay(image);
                     
-                    if (isPP) rectangle(image, trueArea, Scalar(255, 0, 0));
-                    
-                    if (!foundMatch)
-                    {
-                        if (isPP)
-                            FN++;
-                        else
-                            TN++;
-                    }
-                    else
-                    {
-                        Point matchCentroid;
-                        matchCentroid.x = matchTopLeft.x + matchSize.width/2;
-                        matchCentroid.y = matchTopLeft.y + matchSize.height/2;
-                        
-                        if (matchCentroid.inside(trueArea))
-                        {
-                            TP++;
-                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
-                        }
-                        else
-                        {
-                            FP++;
-                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
-                        }
-                    }
-
-                    imshow("Image", image);
+//                    if (isPP) rectangle(image, trueArea, Scalar(255, 0, 0));
+//                    
+//                    if (!foundMatch)
+//                    {
+//                        if (isPP)
+//                            FN++;
+//                        else
+//                            TN++;
+//                    }
+//                    else
+//                    {
+//                        Point matchCentroid;
+//                        matchCentroid.x = matchTopLeft.x + matchSize.width/2;
+//                        matchCentroid.y = matchTopLeft.y + matchSize.height/2;
+//                        
+//                        if (matchCentroid.inside(trueArea))
+//                        {
+//                            TP++;
+//                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
+//                        }
+//                        else
+//                        {
+//                            FP++;
+//                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
+//                        }
+//                    }
+//
+//                    imshow("Image", image);
 
                     for (;;)
                     {
@@ -164,93 +162,6 @@ int main(int argc, char** argv)
             cout << "Could not open directory" << endl;
             return -1;
         }
-    }
-    else
-    {
-        Mat frame;
-        
-        VideoCapture capture(0);
-        if (!capture.isOpened())
-        {
-            cout << "Could not open VideoCapture." << endl;
-            return -1;
-        }
-
-        string frameWindow = "Webcam";
-        string matchWindow = "Matches";
-        namedWindow(frameWindow, CV_WINDOW_AUTOSIZE);
-        namedWindow(matchWindow, CV_WINDOW_AUTOSIZE);
-
-        int framecount = 0;
-        timeval start;
-        gettimeofday(&start, 0);
-        for (;;)
-        {
-            capture >> frame;
-            imshow(frameWindow, frame);
-            cvtColor(frame, gray, CV_RGB2GRAY);
-
-            Point largest_point;
-            Size largest_size;
-            matchAllTemplates(gray, templates, largest_point, largest_size, threshold, matchMethod);
-
-            cvtColor(gray, gray, CV_GRAY2RGB);
-
-            rectangle(gray, Rect(largest_point, largest_size), Scalar(255, 0, 0));
-
-            //        for (vector<Rect>::iterator it = matches.begin(); it != matches.end(); ++it)
-            //            rectangle(gray, *it, Scalar(255, 0, 0));
-
-            imshow(matchWindow, gray);
-
-            int c = waitKey(1);
-            if ((char) c == 27 /*ESC key*/)
-            {
-                timeval end;
-                gettimeofday(&end, 0);
-                int seconds = (end.tv_sec - start.tv_sec);
-                int fps = framecount / seconds + 0.5;
-                cout << "fps = " << fps << endl;
-                break;
-            }
-            else if ((char) c == 'x')
-            {
-                threshold += 0.01;
-                cout << "threshold +0.01 = " << threshold << endl;
-            }
-            else if ((char) c == 'z')
-            {
-                threshold -= 0.01;
-                cout << "threshold -0.01 = " << threshold << endl;
-            }
-            else if ((char) c == '1')
-            {
-                matchMethod = 1;
-                cout << "matchMethod = SQDIFF (1)" << endl;
-            }
-            else if ((char) c == '2')
-            {
-                matchMethod = 2;
-                cout << "matchMethod = SQDIFF NORMED (2)" << endl;
-            }
-            else if ((char) c == '3')
-            {
-                matchMethod = 3;
-                cout << "matchMethod = TM CCORR (3)" << endl;
-            }
-            else if ((char) c == '4')
-            {
-                matchMethod = 4;
-                cout << "matchMethod = TM COEFF (4)" << endl;
-            }
-            else if ((char) c == '5')
-            {
-                matchMethod = 5;
-                cout << "matchMethod = TM COEFF NORMED (5)" << endl;
-            }
-            framecount++;
-        }
-    }
     return 0;
 }
 
@@ -343,12 +254,31 @@ void printResults(int TN, int TP, int FN, int FP, int TG, int TF)
     cout << "----------------" << endl;
     cout << endl;
     cout << "Tracker Detection Rate = " << (float)TP/TG << endl;
-    cout << "False Alarm Rate = " << (float)FP/(TP+FP) << endl;
-    cout << "Detection Rate = " << (float)TP/(TP+FN) << endl;
-    cout << "Specificity = " << (float)TN/(FP+TN) << endl;
-    cout << "Accuracy = " << (float)(TP+TN)/TF << endl;
-    cout << "Positive Prediction = " << (float)TP/(TP+FP) << endl;
-    cout << "Negative Prediction = " << (float)TN/(FN+TN) << endl;
-    cout << "False Negative Rate = " << (float)FN/(FN+TP) << endl;
-    cout << "False Positive Rate = " << (float)FP/(FP+TN) << endl;
+    cout << "False Alarm Rate =       " << (float)FP/(TP+FP) << endl;
+    cout << "Detection Rate =         " << (float)TP/(TP+FN) << endl;
+    cout << "Specificity =            " << (float)TN/(FP+TN) << endl;
+    cout << "Accuracy =               " << (float)(TP+TN)/TF << endl;
+    cout << "Positive Prediction =    " << (float)TP/(TP+FP) << endl;
+    cout << "Negative Prediction =    " << (float)TN/(FN+TN) << endl;
+    cout << "False Negative Rate =    " << (float)FN/(FN+TP) << endl;
+    cout << "False Positive Rate =    " << (float)FP/(FP+TN) << endl;
 }
+
+
+/** @function detectAndDisplay */
+void detectAndDisplay( Mat frame )
+{
+  std::vector<Rect> pp;
+  Mat frame_gray;
+
+  cvtColor( frame, frame_gray, CV_BGR2GRAY );
+  equalizeHist( frame_gray, frame_gray );
+
+  haarCascade.detectMultiScale( frame_gray, pp, 1.1, 2, 0, Size(1, 1) , Size(30, 30));
+
+  for( int i = 0; i < pp.size(); i++ )
+  {
+    rectangle(frame, pp[i], Scalar(0, 255, 0));
+  }
+  imshow( window, frame );
+ }
