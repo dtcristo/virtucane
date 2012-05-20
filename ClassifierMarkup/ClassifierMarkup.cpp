@@ -29,6 +29,14 @@ onMouse(int event, int x, int y, int, void*)
     else
     {
         first = true;
+        if ((x - pt1.x) >= (y - pt1.y))
+        {
+            y = pt1.y + (x - pt1.x);
+        }
+        else
+        {
+            x = pt1.x + (y - pt1.y);
+        }
         pt2 = Point(x, y);
         rectangle(image, pt1, pt2, Scalar(255, 0, 0));
         imshow("Image", image);
@@ -46,6 +54,14 @@ main(int, char**)
     struct dirent *ent;
     string path = "/Volumes/dtcristo/pp_resized/";
     dir = opendir(path.c_str());
+    
+    string outFileName = "info.dat";
+    ofstream outFile;
+    outFile.open(outFileName.c_str(), ios::app);
+    
+    string bgFileName = "bg.txt";
+    ofstream bgFile;
+    bgFile.open(bgFileName.c_str(), ios::app);
 
     if (dir != NULL)
     {
@@ -74,6 +90,8 @@ main(int, char**)
                     int c = waitKey(1);
                     if ((char) c == 27 /*ESC key*/)
                     {
+                        outFile.close();
+                        bgFile.close();
                         return 0;
                     }
                     else if ((char) c == 'c')
@@ -84,35 +102,20 @@ main(int, char**)
                         image = imread(fileName);
                         imshow("Image", image);
                     }
+                    else if ((char) c == 's')
+                        break;
+                    else if ((char) c == 'b')
+                    {
+                        bgFile << fileName << endl;
+                        break;
+                    }
                     else if ((char) c == ' ')
                     {
                         if (done)
                         {
-                            string outFileName = fileName;
-                            outFileName.replace(extentionPos, 4, ".txt");
-
-                            ofstream outFile;
-                            outFile.open(outFileName.c_str());
-                            outFile << pt1.x << "," << pt1.y << "," << pt2.x << "," << pt2.y;
-                            outFile.close();
-
-                            cout << "Written: \"" << pt1.x << "," << pt1.y << "," << pt2.x << "," << pt2.y << "\" to file." << endl;
-                            cout << outFileName << endl;
-
-                            string word;
-                            ifstream inFile(outFileName.c_str());
-                            if (inFile.is_open())
-                            {
-                                while (inFile.good())
-                                {
-                                    getline(inFile, word, ',');
-                                    int coord = atoi(word.c_str());
-                                    cout << word << endl;
-                                }
-                                inFile.close();
-                            }
-                            else cout << "Unable to open file" << endl;
-                            
+                            int width = pt2.x - pt1.x;
+                            outFile << fileName << "  1  " << pt1.x << " " << pt1.y << " " << width << " " << width << endl;
+                            cout    << fileName << "  1  " << pt1.x << " " << pt1.y << " " << width << " " << width << endl;
                             break;
                         }
                     }
@@ -120,6 +123,8 @@ main(int, char**)
             }
         }
         closedir(dir);
+        outFile.close();
+        bgFile.close();
         cout << "Done!" << endl;
         return 0;
     }
