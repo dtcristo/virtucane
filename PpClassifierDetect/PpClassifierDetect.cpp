@@ -7,7 +7,7 @@
 #include <sys/time.h>
 
 #define SCALE_FACTOR    0.7
-#define NUM_TEMPL       3
+#define NUM_TEMPL       7
 #define OPEN_DIR        true
 
 using namespace cv;
@@ -24,9 +24,9 @@ int main(int argc, char** argv)
     Mat gray;
 
     int matchMethod = 5;
-    float threshold = 0.5;
+    float threshold = 0.7;
 
-    cvtColor(imread("crop25.png", 1), templ, CV_RGB2GRAY);
+    cvtColor(imread("crop100.png", 1), templ, CV_RGB2GRAY);
 
     vector<Mat> templates;
     vector<Size> sizes;
@@ -58,10 +58,6 @@ int main(int argc, char** argv)
 
         if (dir != NULL)
         {
-            int framecount = 0;
-            timeval start;
-            gettimeofday(&start, 0);
-            
             while ((ent = readdir(dir)) != NULL)
             {
                 stringstream ss;
@@ -146,27 +142,20 @@ int main(int argc, char** argv)
 
                     imshow("Image", image);
 
-//                    for (;;)
-//                    {
-//                        int c = waitKey(0);
-//                        if ((char) c == 27 /*ESC key*/)
-//                        {
-//                            return 0;
-//                        }
-//                        else if ((char) c == ' ')
-//                        {
-//                            break;
-//                        }
-//                    }
+                    for (;;)
+                    {
+                        int c = waitKey(1);
+                        if ((char) c == 27 /*ESC key*/)
+                        {
+                            return 0;
+                        }
+                        else if ((char) c == ' ')
+                        {
+                            break;
+                        }
+                    }
                 }
-                framecount++;
             }
-            timeval end;
-            gettimeofday(&end, 0);
-            int seconds = (end.tv_sec - start.tv_sec);
-            int fps = framecount / seconds + 0.5;
-            cout << "fps = " << fps << endl;
-            
             closedir(dir);
             printResults(TN, TP, FN, FP, TG, TF);
         }
@@ -354,12 +343,12 @@ void printResults(int TN, int TP, int FN, int FP, int TG, int TF)
     cout << "----------------" << endl;
     cout << endl;
     cout << "Tracker Detection Rate = " << (float)TP/TG << endl;
-    cout << "False Alarm Rate =       " << (float)FP/(TP+FP) << endl;
-    cout << "Detection Rate =         " << (float)TP/(TP+FN) << endl;
-    cout << "Specificity =            " << (float)TN/(FP+TN) << endl;
-    cout << "Accuracy =               " << (float)(TP+TN)/TF << endl;
-    cout << "Positive Prediction =    " << (float)TP/(TP+FP) << endl;
-    cout << "Negative Prediction =    " << (float)TN/(FN+TN) << endl;
-    cout << "False Negative Rate =    " << (float)FN/(FN+TP) << endl;
-    cout << "False Positive Rate =    " << (float)FP/(FP+TN) << endl;
+    cout << "False Alarm Rate = " << (float)FP/(TP+FP) << endl;
+    cout << "Detection Rate = " << (float)TP/(TP+FN) << endl;
+    cout << "Specificity = " << (float)TN/(FP+TN) << endl;
+    cout << "Accuracy = " << (float)(TP+TN)/TF << endl;
+    cout << "Positive Prediction = " << (float)TP/(TP+FP) << endl;
+    cout << "Negative Prediction = " << (float)TN/(FN+TN) << endl;
+    cout << "False Negative Rate = " << (float)FN/(FN+TP) << endl;
+    cout << "False Positive Rate = " << (float)FP/(FP+TN) << endl;
 }
