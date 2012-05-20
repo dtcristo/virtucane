@@ -44,7 +44,7 @@ main(int, char**)
 
     DIR *dir;
     struct dirent *ent;
-    string path = "/Volumes/dtcristo/pp_resized/";
+    string path = "/Volumes/dtcristo/pp_new_resized/";
     dir = opendir(path.c_str());
 
     if (dir != NULL)
@@ -84,6 +84,8 @@ main(int, char**)
                         image = imread(fileName);
                         imshow("Image", image);
                     }
+                    else if ((char) c == 's')
+                        break;
                     else if ((char) c == ' ')
                     {
                         if (done)
