@@ -1,6 +1,7 @@
 #ifndef _READ_TEXT_
 #define _READ_TEXT_
 
+#include "opencv2/opencv.hpp"
 #include <iostream>
 
 #include <boost/program_options.hpp>
@@ -8,6 +9,7 @@ namespace po = boost::program_options;
 
 #include "DetectText.h"
 
+using namespace cv;
 using namespace std;
 
 // Program options

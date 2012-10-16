@@ -29,3 +29,4 @@ local.properties
 */dist/
 */Makefile
 */.dep.inc
+.DS_Store
