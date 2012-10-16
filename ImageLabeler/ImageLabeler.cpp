@@ -44,7 +44,7 @@ main(int, char**)
 
     DIR *dir;
     struct dirent *ent;
-    string path = "/Volumes/dtcristo/pp_new_resized/";
+    string path = "/Volumes/dtcristo/steve/";
     dir = opendir(path.c_str());
 
     if (dir != NULL)
@@ -57,7 +57,7 @@ main(int, char**)
             ss << path << ent->d_name;
             fileName = ss.str();
             cout << fileName << endl;
-            extentionPos = fileName.find(".JPG");
+            extentionPos = fileName.find(".jpg");
             if (extentionPos != string::npos)
             {
                 done = false;

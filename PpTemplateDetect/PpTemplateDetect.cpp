@@ -8,7 +8,7 @@
 
 #define SCALE_FACTOR    0.7
 #define NUM_TEMPL       3
-#define OPEN_DIR        true
+#define OPEN_DIR        false
 
 using namespace cv;
 using namespace std;
@@ -16,15 +16,20 @@ using namespace std;
 void getMatches(Mat result, Size s, vector<Rect> &matches, float thresh);
 void scaleTempl(Mat templ, vector<Mat> &templates, vector<Size> &sizes);
 bool matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, Size &largest_size, float threshold, int matchMethod);
-void printResults(int TN, int TP, int FN, int FP, int TG, int TF);
+void printResults(float threshold, int TN, int TP, int FN, int FP, int TG, int TF);
+void saveResults(float threshold, int TN, int TP, int FN, int FP, int TG, int TF);
+
+ofstream resultsFile;
 
 int main(int argc, char** argv)
 {
+    namedWindow("Image", 1);
+    
     Mat templ;
     Mat gray;
 
     int matchMethod = 5;
-    float threshold = 0.5;
+    float threshold = 0.53;
 
     cvtColor(imread("crop25.png", 1), templ, CV_RGB2GRAY);
 
@@ -34,146 +39,153 @@ int main(int argc, char** argv)
 
     if (OPEN_DIR)
     {
-        int TN = 0;
-        int TP = 0;
-        int FN = 0;
-        int FP = 0;
-        int TG = 0;
-        int TF = 0;
+        //string resultsFileName = "results.csv";
+        //resultsFile.open(resultsFileName.c_str(), ios::app);
+        //resultsFile << "Threshold," << "Tracker Detection Rate," << "False Alarm Rate," << "Detection Rate," << "Specificity," << "Accuracy," << "Positive Prediction," << "Negative Prediction," << "False Negative Rate," << "False Positive Rate" << endl;
         
-        bool isPP;
         
-        Mat image;
-        Point pt1;
-        Point pt2;
-        string fileName;
-        size_t extentionPos;
-
-        namedWindow("Image", 1);
-
-        DIR *dir;
-        struct dirent *ent;
-        string path = "/Volumes/dtcristo/pp_resized/";
-        dir = opendir(path.c_str());
-
-        if (dir != NULL)
+        //for (threshold=0.4; threshold<.7; threshold+=0.025)
         {
-            int framecount = 0;
-            timeval start;
-            gettimeofday(&start, 0);
-            
-            while ((ent = readdir(dir)) != NULL)
+            int TN = 0;
+            int TP = 0;
+            int FN = 0;
+            int FP = 0;
+            int TG = 0;
+            int TF = 0;
+
+            bool isPP;
+
+            Mat image;
+            Point pt1;
+            Point pt2;
+            string fileName;
+            size_t extentionPos;
+
+            DIR *dir;
+            struct dirent *ent;
+            string path = "/Volumes/dtcristo/pp_resized/";
+            dir = opendir(path.c_str());
+
+            if (dir != NULL)
             {
-                stringstream ss;
+                int framecount = 0;
+                timeval start;
+                gettimeofday(&start, 0);
 
-                ss.str("");
-                ss << path << ent->d_name;
-                fileName = ss.str();
-
-                extentionPos = fileName.find(".JPG");
-                if (extentionPos != string::npos)
+                while ((ent = readdir(dir)) != NULL)
                 {
-                    TF++;
-                    
-                    image = imread(fileName);
-                    if (!image.data) // Check for invalid input
-                    {
-                        cout << "Could not open or find the image" << endl;
-                        return -1;
-                    }
+                    stringstream ss;
 
-                    //------------ READ METADATA-------------
-                    string txtFileName = fileName;
-                    txtFileName.replace(extentionPos, 4, ".txt");
-                    string word;
-                    ifstream inFile(txtFileName.c_str());
-                    if (inFile.is_open())
-                    {
-                        getline(inFile, word, ',');
-                        pt1.x = atoi(word.c_str());
-                        getline(inFile, word, ',');
-                        pt1.y = atoi(word.c_str());
-                        getline(inFile, word, ',');
-                        pt2.x = atoi(word.c_str());
-                        getline(inFile, word, ',');
-                        pt2.y = atoi(word.c_str());
-                        inFile.close();
-                        
-                        isPP = true;
-                        TG++;
-                    }
-                    else
-                    {
-                        isPP = false;
-                    }
-                    
-                    Rect trueArea(pt1, pt2);
-                    
-                    //---------------------------------------------
+                    ss.str("");
+                    ss << path << ent->d_name;
+                    fileName = ss.str();
 
-                    cvtColor(image, gray, CV_RGB2GRAY);
+                    extentionPos = fileName.find(".JPG");
+                    if (extentionPos != string::npos)
+                    {
+                        TF++;
 
-                    Point matchTopLeft;
-                    Size matchSize;
-                    bool foundMatch = matchAllTemplates(gray, templates, matchTopLeft, matchSize, threshold, matchMethod);
-                    
-                    if (isPP) rectangle(image, trueArea, Scalar(255, 0, 0));
-                    
-                    if (!foundMatch)
-                    {
-                        if (isPP)
-                            FN++;
-                        else
-                            TN++;
-                    }
-                    else
-                    {
-                        Point matchCentroid;
-                        matchCentroid.x = matchTopLeft.x + matchSize.width/2;
-                        matchCentroid.y = matchTopLeft.y + matchSize.height/2;
-                        
-                        if (matchCentroid.inside(trueArea))
+                        image = imread(fileName);
+                        if (!image.data) // Check for invalid input
                         {
-                            TP++;
-                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
+                            cout << "Could not open or find the image" << endl;
+                            return -1;
+                        }
+
+                        //------------ READ METADATA-------------
+                        string txtFileName = fileName;
+                        txtFileName.replace(extentionPos, 4, ".txt");
+                        string word;
+                        ifstream inFile(txtFileName.c_str());
+                        if (inFile.is_open())
+                        {
+                            getline(inFile, word, ',');
+                            pt1.x = atoi(word.c_str());
+                            getline(inFile, word, ',');
+                            pt1.y = atoi(word.c_str());
+                            getline(inFile, word, ',');
+                            pt2.x = atoi(word.c_str());
+                            getline(inFile, word, ',');
+                            pt2.y = atoi(word.c_str());
+                            inFile.close();
+
+                            isPP = true;
+                            TG++;
                         }
                         else
                         {
-                            FP++;
-                            rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
+                            isPP = false;
                         }
+
+                        Rect trueArea(pt1, pt2);
+
+                        //---------------------------------------------
+
+                        cvtColor(image, gray, CV_RGB2GRAY);
+
+                        Point matchTopLeft;
+                        Size matchSize;
+                        bool foundMatch = matchAllTemplates(gray, templates, matchTopLeft, matchSize, threshold, matchMethod);
+
+                        if (isPP) rectangle(image, trueArea, Scalar(255, 0, 0));
+
+                        if (!foundMatch)
+                        {
+                            if (isPP)
+                                FN++;
+                            else
+                                TN++;
+                        }
+                        else
+                        {
+                            Point matchCentroid;
+                            matchCentroid.x = matchTopLeft.x + matchSize.width/2;
+                            matchCentroid.y = matchTopLeft.y + matchSize.height/2;
+
+                            if (matchCentroid.inside(trueArea))
+                            {
+                                TP++;
+                                rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 255, 0));
+                            }
+                            else
+                            {
+                                FP++;
+                                rectangle(image, Rect(matchTopLeft, matchSize), Scalar(0, 0, 255));
+                            }
+                        }
+
+//                        imshow("Image", image);
+//
+//                        for (;;)
+//                        {
+//                            int c = waitKey(1);
+//                            if ((char) c == 27 /*ESC key*/)
+//                            {
+//                                return 0;
+//                            }
+//                            else if ((char) c == ' ')
+//                            {
+//                                break;
+//                            }
+//                        }
                     }
-
-                    imshow("Image", image);
-
-//                    for (;;)
-//                    {
-//                        int c = waitKey(0);
-//                        if ((char) c == 27 /*ESC key*/)
-//                        {
-//                            return 0;
-//                        }
-//                        else if ((char) c == ' ')
-//                        {
-//                            break;
-//                        }
-//                    }
+                    framecount++;
                 }
-                framecount++;
+                timeval end;
+                gettimeofday(&end, 0);
+                int seconds = (end.tv_sec - start.tv_sec);
+                int fps = framecount / seconds + 0.5;
+                cout << "fps = " << fps << endl;
+
+                closedir(dir);
+                printResults(threshold, TN, TP, FN, FP, TG, TF);
+                //saveResults(threshold, TN, TP, FN, FP, TG, TF);
             }
-            timeval end;
-            gettimeofday(&end, 0);
-            int seconds = (end.tv_sec - start.tv_sec);
-            int fps = framecount / seconds + 0.5;
-            cout << "fps = " << fps << endl;
-            
-            closedir(dir);
-            printResults(TN, TP, FN, FP, TG, TF);
-        }
-        else
-        {
-            cout << "Could not open directory" << endl;
-            return -1;
+            else
+            {
+                cout << "Could not open directory" << endl;
+                return -1;
+            }
         }
     }
     else
@@ -187,32 +199,24 @@ int main(int argc, char** argv)
             return -1;
         }
 
-        string frameWindow = "Webcam";
-        string matchWindow = "Matches";
-        namedWindow(frameWindow, CV_WINDOW_AUTOSIZE);
-        namedWindow(matchWindow, CV_WINDOW_AUTOSIZE);
-
         int framecount = 0;
         timeval start;
         gettimeofday(&start, 0);
         for (;;)
         {
             capture >> frame;
-            imshow(frameWindow, frame);
             cvtColor(frame, gray, CV_RGB2GRAY);
 
             Point largest_point;
             Size largest_size;
             matchAllTemplates(gray, templates, largest_point, largest_size, threshold, matchMethod);
 
-            cvtColor(gray, gray, CV_GRAY2RGB);
-
-            rectangle(gray, Rect(largest_point, largest_size), Scalar(255, 0, 0));
+            rectangle(frame, Rect(largest_point, largest_size), Scalar(255, 0, 0));
 
             //        for (vector<Rect>::iterator it = matches.begin(); it != matches.end(); ++it)
             //            rectangle(gray, *it, Scalar(255, 0, 0));
 
-            imshow(matchWindow, gray);
+            imshow("Image", frame);
 
             int c = waitKey(1);
             if ((char) c == 27 /*ESC key*/)
@@ -223,41 +227,6 @@ int main(int argc, char** argv)
                 int fps = framecount / seconds + 0.5;
                 cout << "fps = " << fps << endl;
                 break;
-            }
-            else if ((char) c == 'x')
-            {
-                threshold += 0.01;
-                cout << "threshold +0.01 = " << threshold << endl;
-            }
-            else if ((char) c == 'z')
-            {
-                threshold -= 0.01;
-                cout << "threshold -0.01 = " << threshold << endl;
-            }
-            else if ((char) c == '1')
-            {
-                matchMethod = 1;
-                cout << "matchMethod = SQDIFF (1)" << endl;
-            }
-            else if ((char) c == '2')
-            {
-                matchMethod = 2;
-                cout << "matchMethod = SQDIFF NORMED (2)" << endl;
-            }
-            else if ((char) c == '3')
-            {
-                matchMethod = 3;
-                cout << "matchMethod = TM CCORR (3)" << endl;
-            }
-            else if ((char) c == '4')
-            {
-                matchMethod = 4;
-                cout << "matchMethod = TM COEFF (4)" << endl;
-            }
-            else if ((char) c == '5')
-            {
-                matchMethod = 5;
-                cout << "matchMethod = TM COEFF NORMED (5)" << endl;
             }
             framecount++;
         }
@@ -347,12 +316,13 @@ bool matchAllTemplates(Mat image, vector<Mat> templates, Point &largest_point, S
     //cout << "Time in msec = " << (b.tv_usec - a.tv_usec)/1000 << endl;
 }
 
-void printResults(int TN, int TP, int FN, int FP, int TG, int TF)
+void printResults(float threshold, int TN, int TP, int FN, int FP, int TG, int TF)
 {
     cout << "----------------" << endl;
     cout << "PRINTING RESULTS" << endl;
     cout << "----------------" << endl;
     cout << endl;
+    cout << "Threshold              = " << threshold << endl;
     cout << "Tracker Detection Rate = " << (float)TP/TG << endl;
     cout << "False Alarm Rate =       " << (float)FP/(TP+FP) << endl;
     cout << "Detection Rate =         " << (float)TP/(TP+FN) << endl;
@@ -362,4 +332,9 @@ void printResults(int TN, int TP, int FN, int FP, int TG, int TF)
     cout << "Negative Prediction =    " << (float)TN/(FN+TN) << endl;
     cout << "False Negative Rate =    " << (float)FN/(FN+TP) << endl;
     cout << "False Positive Rate =    " << (float)FP/(FP+TN) << endl;
+}
+
+void saveResults(float threshold, int TN, int TP, int FN, int FP, int TG, int TF)
+{
+    resultsFile << threshold << "," << (float)TP/TG << "," << (float)FP/(TP+FP) << "," << (float)TP/(TP+FN) << "," << (float)TN/(FP+TN) << "," << (float)(TP+TN)/TF << "," << (float)TP/(TP+FP) << "," << (float)TN/(FN+TN) << "," << (float)FN/(FN+TP) << "," << (float)FP/(FP+TN) << endl;
 }

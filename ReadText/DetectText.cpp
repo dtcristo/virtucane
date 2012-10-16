@@ -70,6 +70,7 @@ void DetectText::detect() {
 	//showMeanStrokeWidth(boxesBothSides_);
 	overlayText(boxesBothSides_, wordsBothSides_);
 
+    imshow("Result", detection_);
 	imwrite(outputPrefix_ + "_detection.jpg", detection_);
 
 	if (verbose_) {
@@ -1039,7 +1040,7 @@ void DetectText::speakResults(vector<string>& text, vector<float>& scores, int m
 	for (size_t i = 0; i < text.size(); i++) {
 		if ((max == 0) || ((int) i < max)) {
 			// Sleep for 0.5 seconds between phrases.
-			if ((int) i != 0) usleep(500 * 1000);
+			if ((int) i != 0) usleep(200 * 1000);
 			ss.str("");
 			ss << "say \"" << text[i] << "\"";
 			int result = system(ss.str().c_str());

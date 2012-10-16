@@ -7,7 +7,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "read_text.h"
+#include "ReadText.h"
 
 using namespace cv;
 using namespace std;
