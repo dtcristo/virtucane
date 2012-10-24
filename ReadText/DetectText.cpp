@@ -70,7 +70,7 @@ void DetectText::detect() {
 	//showMeanStrokeWidth(boxesBothSides_);
 	overlayText(boxesBothSides_, wordsBothSides_);
 
-    imshow("Result", detection_);
+    imshow("Frame", detection_);
 	imwrite(outputPrefix_ + "_detection.jpg", detection_);
 
 	if (verbose_) {

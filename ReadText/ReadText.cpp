@@ -12,15 +12,18 @@ bool speak_ = true;
 int speakMax_ = 0;
 
 int main(int argc, char* argv[]) {
+    
+    int frameNo = 0;
+    bool showingResult = false;
 
     if (WEBCAM)
     {
         Mat frame;
         
         namedWindow("Frame", 1);
-        namedWindow("Result", 1);
+        //namedWindow("Result", 1);
         
-        VideoCapture capture(1);
+        VideoCapture capture(0);
         if (!capture.isOpened())
         {
             cout << "Could not open VideoCapture." << endl;
@@ -31,7 +34,7 @@ int main(int argc, char* argv[]) {
         {
             capture >> frame;
             
-            imshow("Frame", frame);
+            if(!showingResult) imshow("Frame", frame);
 
             int c = waitKey(1);
             if ((char) c == 27 /*ESC key*/)
@@ -40,12 +43,26 @@ int main(int argc, char* argv[]) {
             }
             else if ((char) c == ' ')
             {
-                imwrite("frame.jpg", frame);
-                DetectText detector = DetectText();
-                detector.detect("frame.jpg");
-                
-                //Mat result = imread("frame_detection.jpg");
-                //imshow("Result", result);
+                if (!showingResult)
+                {
+                    stringstream ss;
+                    ss.str("");
+                    ss << "frame_" << frameNo << ".jpg";
+                    
+                    imwrite(ss.str(), frame);
+                    DetectText detector = DetectText();
+                    detector.detect(ss.str());
+                    
+                    //Mat result = imread("frame_detection.jpg");
+                    //imshow("Result", result);
+                    
+                    frameNo++;
+                    showingResult = true;
+                }
+                else
+                {
+                    showingResult = false;
+                }
             }
         }
     }
