@@ -44,7 +44,7 @@ main(int, char**)
 
     DIR *dir;
     struct dirent *ent;
-    string path = "/Volumes/dtcristo/steve/";
+    string path = "/Volumes/dtcristo/pp_resized/";
     dir = opendir(path.c_str());
 
     if (dir != NULL)
